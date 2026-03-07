@@ -150,5 +150,5 @@ proc impl(name: string): Component =
   """
 
 proc welcomeView*(name: string): string =
-  let title = "Welcome Basolato"
+  let title = "Tiara | Pure Nim UI Component Library"
   return $applicationView(title, impl(name))
