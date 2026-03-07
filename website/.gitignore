@@ -4,6 +4,10 @@
 !*/
 !Dockerfile
 
+# Nim cache (must be AFTER !*/ to override re-inclusion)
+.nimcache/
+.nimcache-run/
+
 # Test coverage
 coverage/*
 lcov.info

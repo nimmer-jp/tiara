@@ -1,13 +1,15 @@
 import basolato/view
 import tiara/components as tc
+import ../html_component
 import ../layouts/application_view
 
 
 proc impl(): Component =
-  let topNav = $tc.Tiara.navbar(
+  let topNav = htmlComponent($tc.Tiara.navbar(
     brand = "👑 Tiara",
     links = @[
       ("Features", "#features"),
+      ("Components", "#components"),
       ("Install", "#install"),
       ("Docs", "/docs")
     ],
@@ -20,7 +22,7 @@ proc impl(): Component =
         ("class", "btn-outline")
       ]
     )
-  )
+  ))
 
   let heroVisual = tc.joinHtml([
     tc.rawHtml("""
@@ -46,22 +48,22 @@ proc impl(): Component =
     tc.el("div", tc.textNode("SSR First"), @[("class", "floating-badge badge-2")])
   ])
 
-  let heroSection = $tc.Tiara.hero(
+  let heroSection = htmlComponent($tc.Tiara.hero(
     title = "",
     titleHtml = tc.rawHtml("Elevate Your <span>Nim</span> Apps."),
-    description = "Tiaraは、SSRに最適化された、ピュアNimによるモダンで超軽量なUIコンポーネントライブラリです。JavaScriptの肥大化を防ぎ、最高速のWeb体験を提供します。",
+    description = "Tiaraは、SSRに最適化された、ピュアNimによるモダンで超軽量なUIコンポーネントライブラリです。コンポーネント catalog、検索可能な docs、nimble install 導線までを一貫して提供します。",
     actions = @[
       tc.el("a", tc.textNode("Get Started 🚀"), @[("href", "#install"), ("class", "btn-primary")]),
-      tc.el("a", tc.textNode("View Documentation"), @[("href", "/docs"), ("class", "btn-secondary")])
+      tc.el("a", tc.textNode("Browse Components"), @[("href", "/components"), ("class", "btn-secondary")])
     ],
     visual = heroVisual
-  )
+  ))
 
-  let installMeta = $tc.joinHtml([
+  let installMeta = htmlComponent($tc.joinHtml([
     tc.Tiara.badge("Pure Nim package"),
     tc.Tiara.badge("Fast install path"),
-    tc.Tiara.badge("SSR-first workflow")
-  ])
+    tc.Tiara.badge("Component catalog")
+  ]))
 
   tmpli html"""
     <div class="blob-bg"></div>
@@ -116,15 +118,53 @@ proc impl(): Component =
       </div>
     </section>
 
+    <section id="components" class="catalog-section">
+      <div class="catalog-copy">
+        <p class="section-kicker">Catalog</p>
+        <h2 class="section-title section-title-left">A real component catalog, not just a landing page</h2>
+        <p class="hero-description">
+          <code>example.nim</code> と揃った内容の catalog を <code>/components</code> に用意し、
+          Buttons、Forms、Cards、Tabs、Dropdown、Carousel、Toast までを一覧で確認できます。
+          UI コンポーネントライブラリの HP として、導入前に全体像を掴める構成にしています。
+        </p>
+        <div class="catalog-actions">
+          <a href="/components" class="btn-primary">Open Component Catalog</a>
+          <a href="/docs" class="btn-secondary">Read Guides</a>
+        </div>
+      </div>
+
+      <div class="catalog-grid">
+        <article class="catalog-card">
+          <p class="catalog-card-kicker">Layout & Marketing</p>
+          <h3>Navbar, Hero, Section Header</h3>
+          <p>LP や docs hub を組むための primitive を最初に確認できます。</p>
+        </article>
+        <article class="catalog-card">
+          <p class="catalog-card-kicker">Forms & Inputs</p>
+          <h3>Input, Date Picker, Color Picker, Modal</h3>
+          <p>フォーム入力、補助ダイアログ、基本操作 UI をまとめて試せます。</p>
+        </article>
+        <article class="catalog-card">
+          <p class="catalog-card-kicker">Navigation & Feedback</p>
+          <h3>Tabs, Dropdown, Carousel, Toast</h3>
+          <p>遷移や状態変化を扱う interactive component も catalog 上で確認できます。</p>
+        </article>
+      </div>
+    </section>
+
     <section id="docs" class="docs-section">
       <div class="docs-copy">
         <p class="section-kicker">Docs</p>
-        <h2 class="section-title section-title-left">Documentation page with search</h2>
+        <h2 class="section-title section-title-left">Documentation and searchable guides</h2>
         <p class="hero-description">
           専用の <code>/docs</code> ページでは、Getting Started、コンポーネント例、カスタマイズの入口をまとめて確認できます。
-          検索ボックスからキーワードで絞り込み、必要な情報にすぐ到達できます。
+          検索ボックスからキーワードで絞り込み、必要な情報にすぐ到達できます。完全なコンポーネント一覧は
+          <code>/components</code> に切り出しているため、guide と catalog の役割も分かれています。
         </p>
-        <a href="/docs" class="btn-primary">Open Docs Page</a>
+        <div class="catalog-actions">
+          <a href="/docs" class="btn-primary">Open Docs Page</a>
+          <a href="/components" class="btn-secondary">Open Component Catalog</a>
+        </div>
       </div>
 
       <div class="docs-preview-card">
@@ -143,6 +183,10 @@ proc impl(): Component =
         <div class="docs-preview-item">
           <p>Customization</p>
           <strong>Override default styles safely</strong>
+        </div>
+        <div class="docs-preview-item">
+          <p>Component Catalog</p>
+          <strong>Jump to the full example-backed showcase</strong>
         </div>
       </div>
     </section>

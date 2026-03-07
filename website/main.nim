@@ -13,6 +13,8 @@ let routes = @[
     Route.group("", @[
       Route.get("/", welcome_controller.index),
       Route.get("/docs", welcome_controller.docs),
+      Route.get("/components", welcome_controller.components),
+      Route.get("/tiara-client", welcome_controller.tiaraClientJs),
     ])
     .middleware(session_middleware.sessionFromCookie)
     .middleware(auth_middleware.checkCsrfToken),

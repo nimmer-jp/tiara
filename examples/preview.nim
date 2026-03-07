@@ -8,13 +8,18 @@ proc demoSection(title: string, body: Html): Html =
     @[("class", "demo-section")]
   )
 
-proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
+proc renderPreviewPage*(
+  clientScriptSrc = "assets/tiara_client.js",
+  homeHref = "#",
+  docsHref = "#",
+  componentsHref = "#"
+): string =
   let navbarDemo = Tiara.navbar(
     brand = "👑 Tiara",
     links = @[
-      ("Docs", "#"),
-      ("Components", "#"),
-      ("Search", "#")
+      ("Home", homeHref),
+      ("Docs", docsHref),
+      ("Components", componentsHref)
     ],
     action = el(
       "a",
@@ -88,6 +93,12 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
     Tiara.badge("Accent", tone = "accent"),
     Tiara.badge("Success", tone = "success", variant = "solid"),
     Tiara.badge("Warning", tone = "warning", variant = "outline")
+  ]), @[("class", "showcase-row")])
+
+  let catalogMeta = el("div", joinHtml([
+    Tiara.badge("15 component groups", tone = "accent", variant = "solid"),
+    Tiara.badge("Interactive demos", tone = "success"),
+    Tiara.badge("SSR-first", tone = "warning", variant = "outline")
   ]), @[("class", "showcase-row")])
 
   let sectionHeaderDemo = el("div", joinHtml([
@@ -189,10 +200,11 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
   ])
 
   let content = joinHtml([
-    Tiara.text("Tiara Component Preview", tag = "h1", attrs = @[("class",
+    Tiara.text("Tiara Component Catalog", tag = "h1", attrs = @[("class",
         "page-title")]),
-    Tiara.text("This page renders components directly from the current repository implementation.",
+    Tiara.text("Explore the same components shipped in the current repository, with live previews and implementation-ready examples.",
         tag = "p", attrs = @[("class", "page-description")]),
+    catalogMeta,
 
     demoSection("Navbar", navbarDemo),
     demoSection("Hero", heroDemo),
@@ -255,7 +267,7 @@ body {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tiara Component Preview</title>
+  <title>Tiara Component Catalog</title>
 </head>
 <body>
 {body}

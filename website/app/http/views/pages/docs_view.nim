@@ -1,13 +1,52 @@
 import basolato/view
 import tiara/components as tc
+import ../html_component
 import ../layouts/application_view
 
 
+proc demoCard(
+  title: string,
+  description: string,
+  searchTokens: string,
+  preview: tc.Html,
+  codeSample: tc.Html
+): Component =
+  htmlComponent($tc.el(
+    "article",
+    tc.joinHtml([
+      tc.el(
+        "div",
+        tc.joinHtml([
+          tc.el("p", tc.textNode("Component demo"), @[("class", "component-demo-kicker")]),
+          tc.el("h3", tc.textNode(title), @[("class", "component-demo-title")]),
+          tc.el("p", tc.textNode(description), @[("class", "component-demo-description")])
+        ]),
+        @[("class", "component-demo-copy")]
+      ),
+      tc.el(
+        "div",
+        tc.joinHtml([
+          tc.el("span", tc.textNode("Live preview"), @[("class", "component-demo-label")]),
+          preview
+        ]),
+        @[("class", "component-demo-preview")]
+      ),
+      tc.el("div", codeSample, @[("class", "component-demo-code")])
+    ]),
+    @[
+      ("class", "component-demo-card"),
+      ("data-doc-item", ""),
+      ("data-doc-search", searchTokens)
+    ]
+  ))
+
+
 proc impl(): Component =
-  let topNav = $tc.Tiara.navbar(
+  let topNav = htmlComponent($tc.Tiara.navbar(
     brand = "👑 Tiara",
     links = @[
       ("Home", "/"),
+      ("Catalog", "/components"),
       ("Search", "#search"),
       ("Install", "#install")
     ],
@@ -20,24 +59,164 @@ proc impl(): Component =
         ("class", "btn-outline")
       ]
     )
-  )
+  ))
 
-  let docsSearchHead = $tc.Tiara.sectionHeader(
+  let docsSearchHead = htmlComponent($tc.Tiara.sectionHeader(
     title = "Find a guide or component fast",
     kicker = "Search",
     actions = tc.el(
       "p",
-      tc.textNode("5 sections"),
+      tc.textNode("9 sections"),
       @[("class", "docs-search-meta"), ("data-doc-count", "")]
     ),
     attrs = @[("class", "docs-search-head")]
-  )
+  ))
 
-  let docsSearchInput = $tc.Tiara.searchBox(
+  let docsSearchInput = htmlComponent($tc.Tiara.searchBox(
     name = "docs-search",
     placeholder = "Search installation, toast, customization...",
     attrs = @[("class", "docs-search-box")],
     inputAttrs = @[("data-doc-search-input", "")]
+  ))
+
+  let componentsHead = htmlComponent($tc.Tiara.sectionHeader(
+    title = "Live component demos",
+    description = "ここでは主要な demo を抜粋表示しています。完全な一覧と interactive showcase は /components にまとめています。",
+    kicker = "Components",
+    actions = tc.el(
+      "a",
+      tc.textNode("Open full catalog"),
+      @[("href", "/components"), ("class", "btn-secondary docs-component-link")]
+    ),
+    attrs = @[("class", "docs-component-head")]
+  ))
+
+  let buttonDemo = demoCard(
+    title = "Buttons and status badges",
+    description = "CTA と補助アクション、状態バッジの組み合わせをそのまま確認できます。",
+    searchTokens = "button buttons badge badges primary secondary outline cta status component demo",
+    preview = tc.joinHtml([
+      tc.el(
+        "div",
+        tc.joinHtml([
+          tc.Tiara.button("Create project", attrs = @[("type", "button")]),
+          tc.Tiara.button("Preview docs", color = "secondary", attrs = @[("type", "button")]),
+          tc.Tiara.button("CLI install", outlined = true, attrs = @[("type", "button")])
+        ]),
+        @[("class", "demo-button-row")]
+      ),
+      tc.el(
+        "div",
+        tc.joinHtml([
+          tc.Tiara.badge("Stable", tone = "success"),
+          tc.Tiara.badge("Pure Nim", tone = "accent", variant = "solid"),
+          tc.Tiara.badge("CLI ready", tone = "warning", variant = "outline")
+        ]),
+        @[("class", "demo-badge-row")]
+      )
+    ]),
+    codeSample = tc.Tiara.codeBlock(
+      """import tiara/components
+
+let toolbar = tc.joinHtml([
+  Tiara.button("Create project", attrs = @[("type", "button")]),
+  Tiara.button("Preview docs", color = "secondary", attrs = @[("type", "button")]),
+  Tiara.badge("Stable", tone = "success")
+])""",
+      language = "nim",
+      title = "buttons_and_badges.nim"
+    )
+  )
+
+  let cardDemo = demoCard(
+    title = "Cards for release summaries",
+    description = "情報量が多い説明でも、本文と footer を分けて読みやすく配置できます。",
+    searchTokens = "card cards glass summary release footer content marketing docs component demo",
+    preview = tc.Tiara.card(
+      title = "Release summary",
+      content = tc.joinHtml([
+        tc.el(
+          "p",
+          tc.textNode("Website docs, searchable guides, and install snippets now ship from the same Tiara package."),
+          @[("class", "demo-card-copy")]
+        ),
+        tc.el(
+          "div",
+          tc.joinHtml([
+            tc.Tiara.badge("Docs synced", tone = "accent"),
+            tc.Tiara.badge("SSR first", tone = "success")
+          ]),
+          @[("class", "demo-badge-row")]
+        )
+      ]),
+      footer = tc.Tiara.button("Read getting started", color = "secondary", attrs = @[("type", "button")]),
+      variant = "glass"
+    ),
+    codeSample = tc.Tiara.codeBlock(
+      """import tiara/components
+
+let summary = Tiara.card(
+  title = "Release summary",
+  content = tc.el("p", tc.textNode("Docs and package output stay aligned.")),
+  footer = Tiara.button("Read getting started", attrs = @[("type", "button")]),
+  variant = "glass"
+)""",
+      language = "nim",
+      title = "card_demo.nim"
+    )
+  )
+
+  let codeBlockDemo = demoCard(
+    title = "Code blocks with terminal chrome",
+    description = "インストール手順やサンプルコードを terminal 風の見た目で見せられます。",
+    searchTokens = "code block terminal install command sample syntax highlight component demo",
+    preview = tc.Tiara.codeBlock(
+      """nimble install tiara
+nimble test
+nim c -r examples/preview.nim""",
+      language = "text",
+      title = "install.sh",
+      chrome = "terminal"
+    ),
+    codeSample = tc.Tiara.codeBlock(
+      """import tiara/components
+
+let install = Tiara.codeBlock(
+  "nimble install tiara",
+  title = "install.sh",
+  chrome = "terminal"
+)""",
+      language = "nim",
+      title = "code_block.nim"
+    )
+  )
+
+  let toastDemo = demoCard(
+    title = "Toast notifications without heavy JS",
+    description = "完了通知や警告を軽量に差し込めます。docs では静的プレビューとして開いた状態を表示しています。",
+    searchTokens = "toast notification success warning feedback alert component demo",
+    preview = tc.el(
+      "div",
+      tc.Tiara.toast(
+        message = "Static preview for the docs page.",
+        title = "Deployment ready",
+        tone = "success",
+        dismissible = false,
+        attrs = @[("class", "is-open")]
+      ),
+      @[("class", "demo-toast-stage")]
+    ),
+    codeSample = tc.Tiara.codeBlock(
+      """import tiara/components
+
+let notice = Tiara.toast(
+  title = "Deployment ready",
+  message = "Static preview for the docs page.",
+  tone = "success"
+)""",
+      language = "nim",
+      title = "toast_demo.nim"
+    )
   )
 
   tmpli html"""
@@ -54,6 +233,7 @@ proc impl(): Component =
           <p class="docs-description">
             使い始めるための導線、コンポーネント探索、カスタマイズの入口を 1 ページにまとめています。
             下の検索ボックスから、インストール方法やコンポーネントのトピックをすぐに絞り込めます。
+            さらにそのまま下へ進むと、主要コンポーネントの live demo も確認できます。
           </p>
         </div>
 
@@ -111,6 +291,17 @@ let myToast = renderToast(
         </div>
 
         <p class="docs-empty-state" data-doc-empty hidden>No matching documentation sections.</p>
+      </section>
+
+      <section id="components" class="docs-components-section">
+        $(componentsHead)
+
+        <div class="component-demo-grid">
+          $(buttonDemo)
+          $(cardDemo)
+          $(codeBlockDemo)
+          $(toastDemo)
+        </div>
       </section>
 
       <section id="install" class="docs-install">

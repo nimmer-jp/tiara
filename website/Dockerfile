@@ -1,6 +1,7 @@
 FROM nimlang/nim:2.2.6-alpine-regular AS build
 WORKDIR /app
 COPY src /app/src
+COPY examples /app/examples
 COPY website /app/website
 WORKDIR /app/website
 RUN nimble build -d:release -y && strip /app/website/main
