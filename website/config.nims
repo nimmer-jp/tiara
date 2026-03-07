@@ -2,7 +2,7 @@ import std/os
 if not existsEnv("HOST"):
   putEnv("HOST", "0.0.0.0")
 if not existsEnv("PORT"):
-  putEnv("PORT", "8000")
+  putEnv("PORT", "8080")
 if not existsEnv("DB_SQLITE"):
   putEnv("DB_SQLITE", $true) # "true" or "false"
 # putEnv("DB_POSTGRES", $true) # "true" or "false"
