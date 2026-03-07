@@ -1,3 +1,5 @@
+switch("path", "../src")
+
 import std/os
 if not existsEnv("HOST"):
   putEnv("HOST", "0.0.0.0")

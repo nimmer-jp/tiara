@@ -9,6 +9,41 @@ proc demoSection(title: string, body: Html): Html =
   )
 
 proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
+  let navbarDemo = Tiara.navbar(
+    brand = "👑 Tiara",
+    links = @[
+      ("Docs", "#"),
+      ("Components", "#"),
+      ("Search", "#")
+    ],
+    action = el(
+      "a",
+      textNode("GitHub"),
+      @[
+        ("href", "https://github.com/nimmer-jp/tiara"),
+        ("class", "btn btn-secondary btn-medium btn-outline")
+      ]
+    )
+  )
+
+  let heroDemo = Tiara.hero(
+    title = "",
+    titleHtml = rawHtml("Ship <span style=\"color:#7c3aed;\">search-ready</span> Nim websites."),
+    description = "New website-facing primitives make landing pages, docs hubs, and install guides easier to compose directly from Tiara.",
+    kicker = "Marketing UI",
+    badges = @["SSR-first", "Docs Search", "Nimble Install"],
+    actions = @[
+      Tiara.button("Open Docs"),
+      Tiara.button("Try Search", color = "secondary", outlined = true)
+    ],
+    visual = Tiara.codeBlock(
+      code = "nimble install tiara",
+      language = "sh",
+      title = "terminal",
+      chrome = "terminal"
+    )
+  )
+
   let buttonsDemo = joinHtml([
     Tiara.button("Primary"),
     Tiara.button("Secondary", color = "secondary"),
@@ -47,6 +82,68 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
     Tiara.profileIcon(name = "Jane Doe", status = "online", size = "medium"),
     Tiara.profileIcon(name = "Ken Watanabe", status = "away", size = "large")
   ])
+
+  let badgeDemo = el("div", joinHtml([
+    Tiara.badge("Neutral"),
+    Tiara.badge("Accent", tone = "accent"),
+    Tiara.badge("Success", tone = "success", variant = "solid"),
+    Tiara.badge("Warning", tone = "warning", variant = "outline")
+  ]), @[("class", "showcase-row")])
+
+  let sectionHeaderDemo = el("div", joinHtml([
+    Tiara.sectionHeader(
+      title = "Documentation sections",
+      description = "Use consistent kickers, titles, and actions across guides and component indexes.",
+      kicker = "Section Header",
+      actions = joinHtml([
+        Tiara.badge("Beta", tone = "accent", variant = "solid"),
+        Tiara.button("Explore", size = "small")
+      ])
+    ),
+    Tiara.sectionHeader(
+      title = "Centered variation",
+      description = "The same primitive can also anchor a centered marketing block.",
+      kicker = "Variation",
+      align = "center",
+      size = "large"
+    )
+  ]), @[("class", "stack")])
+
+  let searchDemo = el("div", joinHtml([
+    Tiara.searchBox(
+      name = "docs-search",
+      label = "Documentation Search",
+      placeholder = "Search installation, toast, customization..."
+    ),
+    Tiara.searchBox(
+      name = "component-search",
+      placeholder = "Search components...",
+      variant = "outline",
+      size = "large"
+    )
+  ]), @[("class", "stack"), ("style", "max-width: 34rem;")])
+
+  let cardVariantDemo = el("div", joinHtml([
+    Tiara.card(
+      "Default",
+      Tiara.text("Balanced surface for app UI and internal tools.")
+    ),
+    Tiara.card(
+      "Elevated",
+      Tiara.text("A stronger shadow helps distinguish featured content."),
+      variant = "elevated"
+    ),
+    Tiara.card(
+      "Outline",
+      Tiara.text("Subtle presentation for secondary content blocks."),
+      variant = "outline"
+    ),
+    Tiara.card(
+      "Glass",
+      Tiara.text("Marketing-style translucent surface for hero callouts."),
+      variant = "glass"
+    )
+  ]), @[("class", "showcase-grid")])
 
   let carouselDemo = Tiara.carousel(
     id = "feature-carousel",
@@ -97,11 +194,17 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
     Tiara.text("This page renders components directly from the current repository implementation.",
         tag = "p", attrs = @[("class", "page-description")]),
 
+    demoSection("Navbar", navbarDemo),
+    demoSection("Hero", heroDemo),
     demoSection("Buttons", el("div", buttonsDemo, @[("class",
         "showcase-row")])),
+    demoSection("Badges", badgeDemo),
+    demoSection("Section Headers", sectionHeaderDemo),
+    demoSection("Search Boxes", searchDemo),
     demoSection("Forms", el("div", formDemo, @[("class", "stack")])),
     demoSection("Modal", modalDemo),
     demoSection("Code Block", codeDemo),
+    demoSection("Card Variants", cardVariantDemo),
     demoSection("Badges & Profile Icons", el("div", iconDemo, @[("class",
         "showcase-row")])),
     demoSection("Carousel", carouselDemo),
@@ -138,7 +241,9 @@ body {
 .demo-section { margin-bottom: 1rem; }
 .stack { display: grid; gap: 0.875rem; }
 .showcase-row { align-items: center; display: flex; flex-wrap: wrap; gap: 0.9rem; }
+.showcase-grid { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .tabs, .dropdown, .toast, .carousel, .code-block { width: 100%; }
+.navbar, .hero, .section-header { width: 100%; }
 </style>
 """),
     el("main", Tiara.container(content), @[("class", "page-wrap")]),

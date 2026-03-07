@@ -12,6 +12,7 @@ let routes = @[
   Route.group("", @[
     Route.group("", @[
       Route.get("/", welcome_controller.index),
+      Route.get("/docs", welcome_controller.docs),
     ])
     .middleware(session_middleware.sessionFromCookie)
     .middleware(auth_middleware.checkCsrfToken),

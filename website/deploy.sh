@@ -2,6 +2,7 @@
 set -eu
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 cd "$SCRIPT_DIR"
 
 PROJECT_ID="${PROJECT_ID:-pianopia}"
@@ -22,10 +23,11 @@ fi
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 
 docker buildx build \
+  -f "$SCRIPT_DIR/Dockerfile" \
   -t "$IMAGE" \
   --platform linux/amd64 \
   --load \
-  .
+  "$REPO_ROOT"
 
 docker push "$IMAGE"
 

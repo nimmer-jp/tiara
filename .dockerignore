@@ -1,0 +1,10 @@
+.git
+.gitignore
+**/.nimcache
+**/.DS_Store
+example
+basolato_web
+examples/dist
+website/.env
+website/main
+website/session.db

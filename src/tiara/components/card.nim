@@ -7,6 +7,7 @@ proc card*(
   title: string,
   content: Html,
   footer: Html = rawHtml(""),
+  variant = "",
   attrs: seq[(string, string)] = @[]
 ): Html =
   var segments: seq[Html] = @[
@@ -20,6 +21,5 @@ proc card*(
   el(
     "section",
     joinHtml(segments),
-    mergeAttrs(@[("class", "card")], attrs)
+    mergeAttrs(@[("class", classList(["card", if variant.len > 0: "card-" & variant else: ""]))], attrs)
   )
-

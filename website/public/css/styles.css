@@ -25,7 +25,10 @@ body {
     position: relative;
 }
 
-/* Background Blobs for Glassmorphism Context */
+code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+}
+
 .blob-bg {
     position: absolute;
     width: 600px;
@@ -54,7 +57,6 @@ body {
     100% { transform: translate(50px, 50px) scale(1.1); }
 }
 
-/* Navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -103,11 +105,10 @@ body {
 }
 
 .btn-outline:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Hero Section */
 .hero {
     display: flex;
     align-items: center;
@@ -139,7 +140,7 @@ body {
 .hero-description {
     font-size: 1.2rem;
     color: var(--text-secondary);
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .hero-actions {
@@ -147,7 +148,8 @@ body {
     gap: 1.5rem;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
     padding: 1rem 2rem;
     border-radius: 999px;
     font-weight: 600;
@@ -178,7 +180,6 @@ body {
     border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Visuals */
 .hero-visual {
     flex: 1;
     position: relative;
@@ -216,6 +217,7 @@ body {
     height: 12px;
     border-radius: 50%;
 }
+
 .dot-red { background: #ef4444; }
 .dot-yellow { background: #f59e0b; }
 .dot-green { background: #10b981; }
@@ -243,7 +245,7 @@ pre {
     border-radius: 999px;
     font-size: 0.875rem;
     font-weight: 600;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .badge-1 {
@@ -258,9 +260,24 @@ pre {
     animation: float 7s ease-in-out infinite alternate;
 }
 
-/* Features */
+.install-section,
+.docs-section,
+.docs-page,
+.docs-install {
+    padding: 1rem 5% 5rem;
+}
+
 .features-section {
     padding: 5rem 5%;
+}
+
+.section-kicker {
+    color: #f9a8d4;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
 }
 
 .section-title {
@@ -270,9 +287,105 @@ pre {
     margin-bottom: 3rem;
 }
 
-.features-grid {
+.section-title-left {
+    text-align: left;
+    margin-bottom: 1.5rem;
+}
+
+.install-section,
+.docs-section,
+.docs-install {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+    align-items: center;
+}
+
+.install-inline-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.install-inline-meta span,
+.doc-card-tag,
+.panel-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.install-code-card,
+.docs-preview-card,
+.docs-search-shell,
+.docs-hero-panel,
+.doc-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+}
+
+.install-code-card,
+.docs-preview-card,
+.docs-hero-panel {
+    padding: 1.5rem;
+}
+
+.terminal-header {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.terminal-header span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.terminal-header span:nth-child(1) {
+    background: #fb7185;
+}
+
+.terminal-header span:nth-child(2) {
+    background: #fbbf24;
+}
+
+.terminal-header span:nth-child(3) {
+    background: #34d399;
+}
+
+.install-card-note,
+.panel-note,
+.docs-search-meta,
+.docs-empty-state,
+.docs-preview-item p,
+.doc-card p,
+.docs-description {
+    color: var(--text-secondary);
+}
+
+.install-code-card code,
+.docs-hero-panel code,
+.doc-card code,
+.docs-description code,
+.hero-description code,
+.install-card-note code {
+    color: var(--text-primary);
+}
+
+.features-grid,
+.docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 2rem;
 }
 
@@ -304,7 +417,148 @@ pre {
     color: var(--text-secondary);
 }
 
-/* Responsive */
+.docs-section {
+    padding-top: 0;
+}
+
+.docs-preview-card {
+    display: grid;
+    gap: 1rem;
+}
+
+.docs-preview-search {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 0.95rem 1rem;
+}
+
+.docs-preview-item {
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.docs-page {
+    padding-top: 3rem;
+}
+
+.docs-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 2rem;
+    align-items: start;
+    margin-bottom: 2rem;
+}
+
+.docs-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 6vw, 4.2rem);
+    line-height: 1.05;
+    margin-bottom: 1.25rem;
+}
+
+.docs-search-shell {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.docs-search-box {
+    margin-bottom: 1.5rem;
+}
+
+.docs-search-box .search-box-control {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.95rem 1rem;
+}
+
+.docs-search-box .search-box-control:focus-within {
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.04);
+}
+
+.docs-search-box .search-box-icon {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.docs-search-box .search-box-input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+}
+
+.docs-search-box .search-box-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.docs-search-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1.25rem;
+}
+
+.docs-search-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.95rem 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-icon {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.docs-search-input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+}
+
+.docs-grid {
+    gap: 1rem;
+}
+
+.doc-card {
+    padding: 1.25rem;
+}
+
+.doc-card h3 {
+    font-size: 1.2rem;
+    margin: 1rem 0 0.75rem;
+}
+
+.doc-card pre {
+    margin-top: 1rem;
+}
+
+.docs-empty-state {
+    margin-top: 1.25rem;
+}
+
 @media (max-width: 900px) {
     .hero {
         flex-direction: column;
@@ -312,17 +566,83 @@ pre {
         text-align: center;
         padding-top: 5rem;
     }
+
     .hero-content {
         max-width: 100%;
     }
+
     .hero-actions {
         justify-content: center;
     }
+
     .hero-visual {
         width: 100%;
         margin-top: 3rem;
     }
+
     .floating-badge {
         display: none;
+    }
+
+    .install-section,
+    .docs-section,
+    .docs-install,
+    .docs-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .docs-search-head {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .section-title-left {
+        text-align: center;
+    }
+
+    .install-copy,
+    .docs-copy,
+    .docs-hero-copy {
+        text-align: center;
+    }
+
+    .install-inline-meta {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .navbar {
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        text-align: center;
+    }
+
+    .install-section,
+    .docs-section,
+    .docs-page,
+    .docs-install,
+    .features-section {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
     }
 }

@@ -3,12 +3,22 @@ export utils
 
 import ./components/text
 export text
+import ./components/badge
+export badge
 import ./components/button
 export button
 import ./components/card
 export card
 import ./components/codeBlock
 export codeBlock
+import ./components/sectionHeader
+export sectionHeader
+import ./components/searchBox
+export searchBox
+import ./components/navbar
+export navbar
+import ./components/hero
+export hero
 import ./components/iconWithBadge
 export iconWithBadge
 import ./components/notificationIcon

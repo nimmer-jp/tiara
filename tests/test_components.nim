@@ -2,6 +2,69 @@ import std/[strutils, times, unittest]
 import tiara/components
 
 suite "Tiara components":
+  test "badge supports tone and variant classes":
+    let html = $Tiara.badge("Beta", tone = "accent", variant = "solid", size = "small")
+    check html.contains("class=\"badge badge-accent badge-solid badge-small\"")
+    check html.contains(">Beta<")
+
+  test "navbar renders brand links and action slot":
+    let html = $Tiara.navbar(
+      brand = "Tiara",
+      links = @[
+        ("Docs", "/docs"),
+        ("Search", "/search")
+      ],
+      action = Tiara.badge("New", tone = "accent"),
+      variant = "solid"
+    )
+    check html.contains("data-tiara=\"navbar\"")
+    check html.contains("class=\"navbar navbar-solid navbar-medium\"")
+    check html.contains("<a href=\"/docs\" class=\"nav-link\">Docs</a>")
+    check html.contains("data-tiara=\"badge\"")
+
+  test "hero renders title html and badges":
+    let html = $Tiara.hero(
+      title = "",
+      titleHtml = rawHtml("Fast <span>Nim</span> docs"),
+      description = "Search and install content.",
+      kicker = "Website",
+      badges = @["SSR-first", "Docs Search"],
+      actions = @[Tiara.button("Read Docs")],
+      visual = Tiara.codeBlock("nimble install tiara", chrome = "terminal"),
+      layout = "stacked",
+      align = "center"
+    )
+    check html.contains("data-tiara=\"hero\"")
+    check html.contains("class=\"hero hero-stacked hero-align-center\"")
+    check html.contains("<h1 class=\"hero-title\">Fast <span>Nim</span> docs</h1>")
+    check html.contains("hero-badges")
+    check html.contains("code-block-terminal")
+
+  test "section header supports alignment and actions":
+    let html = $Tiara.sectionHeader(
+      title = "Components",
+      description = "Reusable blocks",
+      kicker = "Docs",
+      align = "center",
+      actions = Tiara.button("Explore", size = "small")
+    )
+    check html.contains("data-tiara=\"section-header\"")
+    check html.contains("class=\"section-header section-header-center section-header-medium\"")
+    check html.contains("section-header-actions")
+
+  test "search box renders icon and search input":
+    let html = $Tiara.searchBox(
+      name = "docs",
+      label = "Search docs",
+      placeholder = "Search installation...",
+      variant = "outline",
+      size = "large"
+    )
+    check html.contains("data-tiara=\"search-box\"")
+    check html.contains("class=\"search-box search-box-outline search-box-large\"")
+    check html.contains("type=\"search\"")
+    check html.contains("search-box-icon")
+
   test "button generates expected classes":
     let html = $Tiara.button("送信する", color = "primary", size = "large", outlined = true)
     check html == "<button class=\"btn btn-primary btn-large btn-outline\">送信する</button>"
@@ -14,6 +77,14 @@ suite "Tiara components":
     check html.contains("<section class=\"card\">")
     check html.contains("<h3 class=\"card-title\">ユーザー情報</h3>")
     check html.contains("<div class=\"card-content\"><p>ここにユーザーの詳細が表示されます。</p></div>")
+
+  test "card supports marketing variants":
+    let html = $Tiara.card(
+      title = "Glass",
+      content = Tiara.text("marketing"),
+      variant = "glass"
+    )
+    check html.contains("class=\"card card-glass\"")
 
   test "date picker resolves today token":
     let html = $Tiara.datePicker(
@@ -57,6 +128,17 @@ suite "Tiara components":
     check html.contains("<span class=\"code-token code-keyword\">let</span>")
     check html.contains("<span class=\"code-token code-number\">42</span>")
     check html.contains("<span class=\"code-token code-comment\"># comment</span>")
+
+  test "code block terminal chrome renders traffic lights":
+    let html = $Tiara.codeBlock(
+      code = "nimble install tiara",
+      language = "sh",
+      title = "terminal",
+      chrome = "terminal"
+    )
+    check html.contains("class=\"code-block code-block-terminal\"")
+    check html.contains("code-block-traffic")
+    check html.contains("code-block-dot-red")
 
   test "notification icon renders badge":
     let html = $Tiara.notificationIcon(badge = "7")
@@ -176,3 +258,5 @@ suite "Tiara components":
     let css = $Tiara.defaultStyles()
     check css.contains(".dropdown-menu { --tiara-dropdown-x: 0;")
     check css.contains(".dropdown-menu-center { left: 50%; --tiara-dropdown-x: -50%; }")
+    check css.contains(".navbar-glass {")
+    check css.contains(".hero-split { grid-template-columns:")
