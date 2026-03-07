@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      .toast {
+        display: block;
+        background: red;
+        color: white;
+        margin: 10px;
+        padding: 10px;
+      }
+      .toast-wrapper {
+        border: 2px solid blue;
+        min-height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="trigger" data-tiara-toast-trigger="toast-1">Show</button>
+    <div
+      id="toast-1"
+      class="toast toast-success"
+      data-tiara="toast"
+      data-tiara-toast-position="bottom-right"
+    >
+      Message
+    </div>
+
+    <script src="src/tiara/client.js"></script>
+    <script>
+      setTimeout(() => {
+        document.getElementById("trigger").click();
+        console.log(
+          "Wrapper exists:",
+          !!document.querySelector(".toast-wrapper"),
+        );
+        if (document.querySelector(".toast-wrapper")) {
+          console.log(
+            "Wrapper HTML:",
+            document.querySelector(".toast-wrapper").innerHTML,
+          );
+        }
+      }, 100);
+    </script>
+  </body>
+</html>

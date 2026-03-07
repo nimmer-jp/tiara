@@ -7,6 +7,8 @@ when defined(js):
   proc jsMatches*(node: JsObject, selectors: cstring): bool {.importcpp: "#.matches(#)".}
   proc jsClosest*(node: JsObject, selectors: cstring): JsObject {.importcpp: "#.closest(#)".}
   proc jsContains*(list: JsObject, class: cstring): bool {.importcpp: "#.contains(#)".}
+  proc jsContainsNode*(parent: JsObject,
+      child: JsObject): bool {.importcpp: "#.contains(#)".}
 
   proc hasClassList*(node: Element): bool =
     let jsNode = node.toJs()
@@ -14,6 +16,10 @@ when defined(js):
 
   proc contains*(list: ClassList, class: cstring): bool =
     return jsContains(list.toJs(), class)
+
+  proc contains*(parent: Node | Element | EventTarget, child: Node | Element |
+      EventTarget): bool =
+    return jsContainsNode(parent.toJs(), child.toJs())
 
   proc matches*(node: Node | Element | EventTarget, selectors: cstring): bool =
     let jsNode = node.toJs()
@@ -236,9 +242,70 @@ when defined(js):
         continue
       setDropdownOpen(drop, false)
 
-  proc hideToast(toast: Element) =
-    if not toast.isNil:
-      toast.setAttribute("hidden", cstring(""))
+  proc hideToast*(toast: Element) =
+    if toast.isNil: return
+
+    # Check if there is a tiaraHideTimer property
+    let jsToast = toast.toJs()
+    if not isUndefined(jsToast.tiaraHideTimer) and not isNull(
+        jsToast.tiaraHideTimer):
+      window.clearTimeout(jsToast.tiaraHideTimer.to(TimeOut))
+      jsToast.tiaraHideTimer = jsNull
+
+    if toast.hasClassList():
+      toast.classList.remove("is-open")
+      toast.classList.add("is-closing")
+
+    discard window.setTimeout(proc() =
+      if toast.hasClassList():
+        toast.classList.remove("is-closing")
+      let wrapper = toast.closest(".toast-wrapper")
+      let storage = document.getElementById("tiara-toast-storage")
+      if not storage.isNil:
+        storage.appendChild(toast)
+      elif not toast.parentNode.isNil:
+        toast.parentNode.removeChild(toast)
+    , 300)
+
+  proc showToast*(toast: Element) =
+    if toast.isNil: return
+
+    var position = toast.getAttribute("data-tiara-toast-position")
+    if position.isNil or $position == "":
+      position = "bottom-right"
+
+    let wrapperClass = "toast-" & $position
+    var wrapper = document.querySelector(".toast-wrapper." & wrapperClass)
+
+    if wrapper.isNil:
+      wrapper = document.createElement("div")
+      wrapper.setAttribute("class", "toast-wrapper " & wrapperClass)
+      document.body.appendChild(wrapper)
+
+    # If the toast is already somewhere else, remove it first
+    if not toast.parentNode.isNil:
+      toast.parentNode.removeChild(toast)
+
+    wrapper.appendChild(toast)
+
+    # Read layout to force CSS transition
+    discard window.getComputedStyle(toast).opacity
+
+    if toast.hasClassList():
+      toast.classList.remove("is-closing")
+      toast.classList.add("is-open")
+
+    let hideAfterStr = toast.getAttribute("data-tiara-toast-autohide")
+    var hideAfter = 0
+    if not hideAfterStr.isNil and $hideAfterStr != "":
+      try: hideAfter = parseInt($hideAfterStr)
+      except ValueError: discard
+
+    if hideAfter > 0:
+      let jsToast = toast.toJs()
+      jsToast.tiaraHideTimer = window.setTimeout(proc() =
+        hideToast(toast)
+      , hideAfter)
 
   proc initTiaraClient*() =
     if tiaraClientReady: return
@@ -305,13 +372,23 @@ when defined(js):
         let itemDropdown = dropdownItem.closest("[data-tiara=\"dropdown\"]")
         if not itemDropdown.isNil:
           setDropdownOpen(itemDropdown.Element, false)
-        return
+        # Dropdown items might also trigger modals or toasts, so do not return here
+        # unless it's strictly a dropdown action. Actually, just let it fall through.
 
       let toastClose = target.closest("[data-tiara-toast-close]")
       if not toastClose.isNil:
         let toast = toastClose.closest("[data-tiara=\"toast\"]")
         if not toast.isNil:
           hideToast(toast.Element)
+        return
+
+      let toastTrigger = target.closest("[data-tiara-toast-trigger]")
+      if not toastTrigger.isNil:
+        let targetId = toastTrigger.getAttribute("data-tiara-toast-trigger")
+        if not targetId.isNil:
+          let toastTarget = document.getElementById($targetId)
+          if not toastTarget.isNil:
+            showToast(toastTarget)
         return
 
       let carouselControl = target.closest("[data-tiara-carousel-action]")
@@ -394,21 +471,28 @@ when defined(js):
     for i in 0 ..< dropdowns.len:
       setDropdownOpen(dropdowns[i], false)
 
-    let toasts = document.querySelectorAll("[data-tiara=\"toast\"][data-tiara-toast-autohide]")
+    # Create a hidden container for inactive toasts so they aren't lost from DOM
+    var toastStorage = document.getElementById("tiara-toast-storage")
+    if toastStorage.isNil:
+      toastStorage = document.createElement("div")
+      toastStorage.id = "tiara-toast-storage"
+      toastStorage.style.display = "none"
+      document.body.appendChild(toastStorage)
+
+    # Initial rendering hides toast from normal flow since it mounts conditionally on trigger.
+    let toasts = document.querySelectorAll("[data-tiara=\"toast\"]")
     for i in 0 ..< toasts.len:
       let toastNode = toasts[i]
-      let hideAfterStr = toastNode.getAttribute("data-tiara-toast-autohide")
-      var hideAfter = 0
-      if not hideAfterStr.isNil and $hideAfterStr != "":
-        try: hideAfter = parseInt($hideAfterStr)
-        except ValueError: discard
+      if toastNode.parentNode != nil and toastNode.closest(
+          ".toast-wrapper").isNil and toastNode.closest(
+          "#tiara-toast-storage").isNil:
+        toastStorage.appendChild(toastNode)
 
-      if hideAfter > 0:
-        discard window.setTimeout(proc() =
-          hideToast(toastNode)
-        , hideAfter)
-
-  initTiaraClient()
+  if document.toJs().readyState.to(cstring) == cstring("loading"):
+    document.addEventListener("DOMContentLoaded", proc(
+        event: Event) = initTiaraClient())
+  else:
+    initTiaraClient()
 
 else:
   const TiaraClientBundle* = slurp("client.js")

@@ -9,6 +9,8 @@ proc toast*(
   tone = "info",
   dismissible = true,
   autoHideMs = 0,
+  position = "bottom-right",
+  id = "",
   attrs: seq[(string, string)] = @[]
 ): Html =
   let normalizedTone =
@@ -43,8 +45,12 @@ proc toast*(
   var baseAttrs = @[
     ("class", classList(["toast", "toast-" & normalizedTone])),
     ("role", "status"),
-    ("data-tiara", "toast")
+    ("data-tiara", "toast"),
+    ("data-tiara-toast-position", position)
   ]
+  if id != "":
+    baseAttrs.add(("id", id))
+
   if autoHideMs > 0:
     baseAttrs.add(("data-tiara-toast-autohide", $autoHideMs))
 

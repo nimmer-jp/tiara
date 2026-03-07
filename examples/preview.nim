@@ -17,9 +17,12 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
   ])
 
   let formDemo = joinHtml([
-    Tiara.input(name = "username", label = "Username", placeholder = "tiara-user"),
-    Tiara.datePicker(name = "birthdate", label = "Birthdate", minDate = "1900-01-01", maxDate = "today"),
-    Tiara.colorPicker(name = "theme", label = "Theme Color", default = "#2563eb")
+    Tiara.input(name = "username", label = "Username",
+        placeholder = "tiara-user"),
+    Tiara.datePicker(name = "birthdate", label = "Birthdate",
+        minDate = "1900-01-01", maxDate = "today"),
+    Tiara.colorPicker(name = "theme", label = "Theme Color",
+        default = "#2563eb")
   ])
 
   let modalDemo = Tiara.modal(
@@ -38,7 +41,8 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
   )
 
   let iconDemo = joinHtml([
-    Tiara.iconWithBadge(Tiara.text("✉", tag = "span"), badge = "12", label = "Inbox"),
+    Tiara.iconWithBadge(Tiara.text("✉", tag = "span"), badge = "12",
+        label = "Inbox"),
     Tiara.notificationIcon(badge = "5"),
     Tiara.profileIcon(name = "Jane Doe", status = "online", size = "medium"),
     Tiara.profileIcon(name = "Ken Watanabe", status = "away", size = "large")
@@ -47,7 +51,8 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
   let carouselDemo = Tiara.carousel(
     id = "feature-carousel",
     items = @[
-      Tiara.card("Fast SSR", Tiara.text("Compile-time optimized HTML rendering.")),
+      Tiara.card("Fast SSR", Tiara.text(
+          "Compile-time optimized HTML rendering.")),
       Tiara.card("Pure Nim", Tiara.text("No external JS framework required.")),
       Tiara.card("Progressive", Tiara.text("Interactive widgets powered by tiny Nim-to-JS."))
     ]
@@ -57,7 +62,8 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
     id = "overview-tabs",
     items = @[
       ("Overview", Tiara.text("Tiara is designed for SSR-first Nim apps.")),
-      ("Usage", Tiara.codeBlock("""let btn = Tiara.button("Send")""", language = "nim")),
+      ("Usage", Tiara.codeBlock("""let btn = Tiara.button("Send")""",
+          language = "nim")),
       ("Notes", Tiara.text("All components render accessible semantic HTML."))
     ]
   )
@@ -74,24 +80,44 @@ proc renderPreviewPage*(clientScriptSrc = "assets/tiara_client.js"): string =
   )
 
   let toastDemo = joinHtml([
-    Tiara.toast("Saved changes successfully.", title = "Success", tone = "success"),
-    Tiara.toast("Storage is almost full.", title = "Warning", tone = "warning", autoHideMs = 5000),
-    Tiara.toast("Unable to sync latest data.", title = "Error", tone = "error")
+      Tiara.toast("Your request has been processed successfully.", "Success",
+          "success", id = "toast-1", position = "bottom-right",
+          autoHideMs = 3000),
+      Tiara.toast("Please check your network connection.", "Warning", "warning",
+          id = "toast-2", position = "top-right", autoHideMs = 5000),
+      Tiara.toast("A new software update is available.", "Update Available",
+          "info", id = "toast-3", position = "top-center", autoHideMs = 4000),
+      Tiara.toast("Failed to save the changes.", "Error", "error",
+          id = "toast-4", position = "bottom-left")
   ])
 
   let content = joinHtml([
-    Tiara.text("Tiara Component Preview", tag = "h1", attrs = @[("class", "page-title")]),
-    Tiara.text("This page renders components directly from the current repository implementation.", tag = "p", attrs = @[("class", "page-description")]),
+    Tiara.text("Tiara Component Preview", tag = "h1", attrs = @[("class",
+        "page-title")]),
+    Tiara.text("This page renders components directly from the current repository implementation.",
+        tag = "p", attrs = @[("class", "page-description")]),
 
-    demoSection("Buttons", el("div", buttonsDemo, @[("class", "showcase-row")])),
+    demoSection("Buttons", el("div", buttonsDemo, @[("class",
+        "showcase-row")])),
     demoSection("Forms", el("div", formDemo, @[("class", "stack")])),
     demoSection("Modal", modalDemo),
     demoSection("Code Block", codeDemo),
-    demoSection("Badges & Profile Icons", el("div", iconDemo, @[("class", "showcase-row")])),
+    demoSection("Badges & Profile Icons", el("div", iconDemo, @[("class",
+        "showcase-row")])),
     demoSection("Carousel", carouselDemo),
     demoSection("Tabs", tabsDemo),
     demoSection("Dropdown", dropdownDemo),
-    demoSection("Toasts", el("div", toastDemo, @[("class", "stack")]))
+    demoSection("Toasts", el("div", joinHtml([
+      Tiara.button("Show Success (Bottom Right)", "primary", attrs = @[(
+          "data-tiara-toast-trigger", "toast-1")]),
+      Tiara.button("Show Warning (Top Right)", "secondary", attrs = @[(
+          "data-tiara-toast-trigger", "toast-2")]),
+      Tiara.button("Show Info (Top Center)", "secondary", attrs = @[(
+          "data-tiara-toast-trigger", "toast-3")]),
+      Tiara.button("Show Error (Bottom Left)", "secondary", attrs = @[(
+          "data-tiara-toast-trigger", "toast-4")])
+    ]), @[("style", "display: flex; gap: 0.5rem; flex-wrap: wrap;")])),
+    toastDemo
   ])
 
   let body = joinHtml([
