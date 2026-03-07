@@ -11,7 +11,37 @@ proc mergeAttrs(
 ): seq[(string, string)] =
   result = @[]
   result.add(baseAttrs)
-  result.add(extraAttrs)
+
+  for (rawName, rawValue) in extraAttrs:
+    let name = rawName.strip()
+    if name.len == 0:
+      continue
+
+    var updated = false
+    for idx in 0 ..< result.len:
+      if result[idx][0] != name:
+        continue
+
+      if name == "class":
+        result[idx] = (name, classList([result[idx][1], rawValue]))
+      elif name == "style":
+        let baseStyle = result[idx][1].strip()
+        let extraStyle = rawValue.strip()
+        if baseStyle.len == 0:
+          result[idx] = (name, extraStyle)
+        elif extraStyle.len == 0:
+          discard
+        else:
+          let separator = if baseStyle.endsWith(";"): " " else: "; "
+          result[idx] = (name, baseStyle & separator & extraStyle)
+      else:
+        result[idx] = (name, rawValue)
+
+      updated = true
+      break
+
+    if not updated:
+      result.add((name, rawValue))
 
 proc normalizeDomId(value: string): string =
   var normalized = newStringOfCap(value.len)
@@ -585,6 +615,8 @@ proc dropdown*(
   label = "Menu",
   trigger: Html = rawHtml(""),
   align = "left",
+  size = "medium",
+  motionMs = 180,
   attrs: seq[(string, string)] = @[]
 ): Html =
   let safeId =
@@ -601,6 +633,12 @@ proc dropdown*(
       "center"
     else:
       "left"
+  let sizeClass =
+    case normalizeDomId(size)
+    of "small", "large":
+      normalizeDomId(size)
+    else:
+      "medium"
 
   var menuItems: seq[Html] = @[]
   if items.len == 0:
@@ -662,9 +700,10 @@ proc dropdown*(
     mergeAttrs(
       @[
         ("id", safeId),
-        ("class", "dropdown"),
+        ("class", classList(["dropdown", "dropdown-" & sizeClass])),
         ("data-tiara", "dropdown"),
-        ("data-tiara-dropdown-open", "false")
+        ("data-tiara-dropdown-open", "false"),
+        ("data-tiara-motion-ms", $max(80, motionMs))
       ],
       attrs
     )
@@ -859,6 +898,8 @@ proc modal*(
   content: Html,
   title = "",
   closeLabel = "閉じる",
+  size = "medium",
+  motionMs = 220,
   attrs: seq[(string, string)] = @[]
 ): Html =
   let safeId =
@@ -866,6 +907,12 @@ proc modal*(
       "tiara-modal"
     else:
       id
+  let sizeClass =
+    case normalizeDomId(size)
+    of "small", "large":
+      normalizeDomId(size)
+    else:
+      "medium"
   var dialogBody: seq[Html] = @[]
 
   if title.len > 0:
@@ -888,8 +935,9 @@ proc modal*(
     mergeAttrs(
       @[
         ("id", safeId),
-        ("class", "modal"),
-        ("data-tiara", "modal")
+        ("class", classList(["modal", "modal-" & sizeClass])),
+        ("data-tiara", "modal"),
+        ("data-tiara-motion-ms", $max(80, motionMs))
       ],
       attrs
     )
@@ -923,8 +971,13 @@ proc defaultStyles*(T: typedesc[Tiara]): Html =
 .input { border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
 .field-color { align-items: center; grid-template-columns: 1fr auto; }
 .color-preview { border: 1px solid #d1d5db; border-radius: 9999px; display: inline-block; height: 1.5rem; width: 1.5rem; }
-.modal { border: none; border-radius: 0.75rem; max-width: 36rem; padding: 1rem; width: calc(100% - 2rem); }
-.modal::backdrop { background: rgba(15, 23, 42, 0.55); }
+.modal { --tiara-motion-ms: 220ms; border: none; border-radius: 0.75rem; max-width: 36rem; opacity: 0; padding: 1rem; transform: translateY(10px) scale(0.985); transition: opacity var(--tiara-motion-ms) cubic-bezier(0.2, 0.7, 0.2, 1), transform var(--tiara-motion-ms) cubic-bezier(0.2, 0.7, 0.2, 1); width: calc(100% - 2rem); }
+.modal-medium { max-width: 36rem; }
+.modal-small { max-width: 26rem; }
+.modal-large { max-width: 48rem; }
+.modal::backdrop { background: rgba(15, 23, 42, 0); transition: background var(--tiara-motion-ms) ease; }
+.modal.is-open { opacity: 1; transform: translateY(0) scale(1); }
+.modal.is-open::backdrop { background: rgba(15, 23, 42, 0.55); }
 .modal-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
 .code-block { background: #0b1120; border-radius: 0.75rem; color: #dbeafe; margin: 0; overflow: hidden; }
 .code-block-header { align-items: center; background: #111827; display: flex; justify-content: space-between; padding: 0.5rem 0.75rem; }
@@ -964,12 +1017,16 @@ proc defaultStyles*(T: typedesc[Tiara]): Html =
 .tabs-trigger.is-active { background: #fff; color: #0f172a; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1); }
 .tabs-panels { padding: 0.875rem; }
 .tabs-panel { color: #334155; }
-.dropdown { display: inline-block; position: relative; }
+.dropdown { --tiara-motion-ms: 180ms; display: inline-block; position: relative; }
 .dropdown-toggle { align-items: center; background: #fff; border: 1px solid #d1d5db; border-radius: 0.625rem; cursor: pointer; display: inline-flex; gap: 0.5rem; padding: 0.45rem 0.75rem; }
-.dropdown-menu { background: #fff; border: 1px solid #e5e7eb; border-radius: 0.625rem; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14); list-style: none; margin: 0.45rem 0 0; min-width: 12rem; padding: 0.35rem; position: absolute; z-index: 20; }
-.dropdown-menu-left { left: 0; }
-.dropdown-menu-right { right: 0; }
-.dropdown-menu-center { left: 50%; transform: translateX(-50%); }
+.dropdown-small .dropdown-toggle { font-size: 0.82rem; padding: 0.35rem 0.65rem; }
+.dropdown-large .dropdown-toggle { font-size: 1rem; padding: 0.6rem 0.9rem; }
+.dropdown-menu { --tiara-dropdown-x: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 0.625rem; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14); list-style: none; margin: 0.45rem 0 0; min-width: 12rem; opacity: 0; padding: 0.35rem; pointer-events: none; position: absolute; transform: translate(var(--tiara-dropdown-x), -6px) scale(0.985); transform-origin: top; transition: opacity var(--tiara-motion-ms) ease, transform var(--tiara-motion-ms) ease; z-index: 20; }
+.dropdown-menu.is-open { opacity: 1; pointer-events: auto; transform: translate(var(--tiara-dropdown-x), 0) scale(1); }
+.dropdown-menu.is-closing { opacity: 0; pointer-events: none; transform: translate(var(--tiara-dropdown-x), -4px) scale(0.985); }
+.dropdown-menu-left { left: 0; --tiara-dropdown-x: 0; }
+.dropdown-menu-right { right: 0; --tiara-dropdown-x: 0; }
+.dropdown-menu-center { left: 50%; --tiara-dropdown-x: -50%; }
 .dropdown-item { border-radius: 0.5rem; margin: 0; padding: 0.4rem 0.55rem; }
 .dropdown-item:hover { background: #f1f5f9; }
 .dropdown-item.is-disabled { color: #9ca3af; }

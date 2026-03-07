@@ -43,7 +43,8 @@ suite "Tiara components":
       content = Tiara.text("本当に削除しますか？")
     )
     check html.contains("data-tiara-modal-open=\"confirm-modal\"")
-    check html.contains("<dialog id=\"confirm-modal\" class=\"modal\" data-tiara=\"modal\">")
+    check html.contains("<dialog id=\"confirm-modal\" class=\"modal modal-medium\" data-tiara=\"modal\"")
+    check html.contains("data-tiara-motion-ms=\"220\"")
     check html.contains("data-tiara-modal-close=\"confirm-modal\"")
 
   test "code block highlights tokens":
@@ -126,3 +127,52 @@ suite "Tiara components":
     check html.contains("class=\"toast toast-success\"")
     check html.contains("data-tiara-toast-close")
     check html.contains("data-tiara-toast-autohide=\"3000\"")
+
+  test "attrs merge allows class and style customization":
+    let html = $Tiara.button(
+      "Custom",
+      attrs = @[
+        ("class", "is-pill"),
+        ("style", "letter-spacing: 0.08em")
+      ]
+    )
+    check html.contains("class=\"btn btn-primary btn-medium is-pill\"")
+    check html.contains("style=\"letter-spacing: 0.08em\"")
+
+  test "modal supports size and motion customization":
+    let html = $Tiara.modal(
+      id = "motion-modal",
+      trigger = Tiara.button("Open"),
+      content = Tiara.text("content"),
+      size = "large",
+      motionMs = 320,
+      attrs = @[
+        ("class", "custom-modal"),
+        ("style", "border: 2px solid #111")
+      ]
+    )
+    check html.contains("class=\"modal modal-large custom-modal\"")
+    check html.contains("data-tiara-motion-ms=\"320\"")
+    check html.contains("style=\"border: 2px solid #111\"")
+
+  test "dropdown supports size and motion customization":
+    let html = $Tiara.dropdown(
+      id = "motion-dropdown",
+      items = @[
+        Tiara.text("A", tag = "span")
+      ],
+      size = "small",
+      motionMs = 260,
+      attrs = @[
+        ("class", "custom-dropdown"),
+        ("style", "z-index: 30")
+      ]
+    )
+    check html.contains("class=\"dropdown dropdown-small custom-dropdown\"")
+    check html.contains("data-tiara-motion-ms=\"260\"")
+    check html.contains("style=\"z-index: 30\"")
+
+  test "default styles keep center dropdown alignment with motion":
+    let css = $Tiara.defaultStyles()
+    check css.contains(".dropdown-menu { --tiara-dropdown-x: 0;")
+    check css.contains(".dropdown-menu-center { left: 50%; --tiara-dropdown-x: -50%; }")

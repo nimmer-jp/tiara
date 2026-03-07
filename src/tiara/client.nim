@@ -61,27 +61,111 @@ const TiaraClientBundle* = """
     }
   }
 
+  function getMotionMs(node, fallbackMs) {
+    if (!node) return fallbackMs;
+    var raw = parseInt(node.getAttribute('data-tiara-motion-ms') || '', 10);
+    if (!(raw > 0)) return fallbackMs;
+    return raw;
+  }
+
+  function openModal(dialog) {
+    if (!dialog) return;
+    var motionMs = getMotionMs(dialog, 220);
+    dialog.style.setProperty('--tiara-motion-ms', String(motionMs) + 'ms');
+
+    if (dialog._tiaraCloseTimer) {
+      clearTimeout(dialog._tiaraCloseTimer);
+      dialog._tiaraCloseTimer = null;
+    }
+
+    if (typeof dialog.showModal === 'function' && !dialog.open) {
+      dialog.showModal();
+    }
+    if (dialog.classList) {
+      dialog.classList.remove('is-closing');
+      dialog.classList.remove('is-opening');
+    }
+    requestAnimationFrame(function () {
+      if (dialog.classList) {
+        dialog.classList.add('is-open');
+      }
+    });
+  }
+
+  function closeModal(dialog) {
+    if (!dialog) return;
+    var motionMs = getMotionMs(dialog, 220);
+    dialog.style.setProperty('--tiara-motion-ms', String(motionMs) + 'ms');
+
+    if (dialog._tiaraCloseTimer) {
+      clearTimeout(dialog._tiaraCloseTimer);
+      dialog._tiaraCloseTimer = null;
+    }
+
+    if (dialog.classList) {
+      dialog.classList.remove('is-open');
+      dialog.classList.add('is-closing');
+    }
+
+    dialog._tiaraCloseTimer = setTimeout(function () {
+      dialog._tiaraCloseTimer = null;
+      if (dialog.classList) {
+        dialog.classList.remove('is-closing');
+      }
+      if (typeof dialog.close === 'function' && dialog.open) {
+        dialog.close();
+      }
+    }, motionMs);
+  }
+
   function setDropdownOpen(dropdown, isOpen) {
     if (!dropdown) return;
 
-    dropdown.setAttribute('data-tiara-dropdown-open', isOpen ? 'true' : 'false');
     var menu = dropdown.querySelector('[data-tiara-dropdown-menu]');
     var toggle = dropdown.querySelector('[data-tiara-dropdown-toggle]');
+    var motionMs = getMotionMs(dropdown, 180);
+    dropdown.style.setProperty('--tiara-motion-ms', String(motionMs) + 'ms');
 
-    if (menu) {
-      if (isOpen) {
-        menu.removeAttribute('hidden');
-      } else {
-        menu.setAttribute('hidden', '');
-      }
-    }
+    dropdown.setAttribute('data-tiara-dropdown-open', isOpen ? 'true' : 'false');
 
     if (toggle) {
       toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     }
 
-    if (dropdown.classList) {
-      dropdown.classList.toggle('is-open', isOpen);
+    if (!menu) return;
+    if (menu._tiaraClosingTimer) {
+      clearTimeout(menu._tiaraClosingTimer);
+      menu._tiaraClosingTimer = null;
+    }
+
+    menu.style.setProperty('--tiara-motion-ms', String(motionMs) + 'ms');
+    if (isOpen) {
+      menu.removeAttribute('hidden');
+      if (menu.classList) {
+        menu.classList.remove('is-closing');
+      }
+      requestAnimationFrame(function () {
+        if (menu.classList) {
+          menu.classList.add('is-open');
+        }
+      });
+    } else {
+      if (menu.hasAttribute('hidden') && (!menu.classList || !menu.classList.contains('is-open'))) {
+        if (menu.classList) {
+          menu.classList.remove('is-closing');
+        }
+        return;
+      }
+      if (menu.classList) {
+        menu.classList.remove('is-open');
+        menu.classList.add('is-closing');
+      }
+      menu._tiaraClosingTimer = setTimeout(function () {
+        if (menu.classList) {
+          menu.classList.remove('is-closing');
+        }
+        menu.setAttribute('hidden', '');
+      }, motionMs);
     }
   }
 
@@ -101,12 +185,17 @@ const TiaraClientBundle* = """
   }
 
   document.addEventListener('click', function (event) {
+    if (event.target && event.target.matches && event.target.matches('dialog[data-tiara=\"modal\"]')) {
+      closeModal(event.target);
+      return;
+    }
+
     var opener = event.target.closest('[data-tiara-modal-open]');
     if (opener) {
       var dialogId = opener.getAttribute('data-tiara-modal-open');
       var dialog = document.getElementById(dialogId);
-      if (dialog && typeof dialog.showModal === 'function') {
-        dialog.showModal();
+      if (dialog) {
+        openModal(dialog);
       }
       return;
     }
@@ -114,8 +203,8 @@ const TiaraClientBundle* = """
     var closeButton = event.target.closest('[data-tiara-modal-close]');
     if (closeButton) {
       var hostDialog = closeButton.closest('dialog');
-      if (hostDialog && typeof hostDialog.close === 'function') {
-        hostDialog.close();
+      if (hostDialog) {
+        closeModal(hostDialog);
       }
       return;
     }
@@ -186,6 +275,14 @@ const TiaraClientBundle* = """
       closeAllDropdowns(null);
     }
   });
+
+  document.addEventListener('cancel', function (event) {
+    if (!event.target || !event.target.matches || !event.target.matches('dialog[data-tiara=\"modal\"]')) {
+      return;
+    }
+    event.preventDefault();
+    closeModal(event.target);
+  }, true);
 
   document.addEventListener('input', function (event) {
     var input = event.target;
