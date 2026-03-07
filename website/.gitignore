@@ -2,6 +2,7 @@
 *
 !*.*
 !*/
+!Dockerfile
 
 # Test coverage
 coverage/*
