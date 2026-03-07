@@ -3,6 +3,7 @@ author        = "Tiara Contributors"
 description   = "Pure Nim UI component library for SSR-first applications"
 license       = "MIT"
 srcDir        = "src"
+skipDirs      = @["website", "tests", "docs", "examples"]
 
 requires "nim >= 2.2.0"
 
