@@ -4,7 +4,6 @@ website/.nimcache/
 website/.nimcache-run/
 *.out
 /tests/test_components
-/src/tiara/client.js
 /examples/dist/
 /example
 /examples/preview
