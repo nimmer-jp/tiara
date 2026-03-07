@@ -1,336 +1,416 @@
-const TiaraClientBundle* = """
-(function () {
-  if (window.__tiaraClientReady) return;
-  window.__tiaraClientReady = true;
-
-  function updateCarousel(carousel, nextIndex) {
-    if (!carousel) return;
-    var track = carousel.querySelector('[data-tiara-carousel-track]');
-    if (!track) return;
-
-    var size = parseInt(carousel.getAttribute('data-tiara-carousel-size') || '0', 10);
-    if (!(size > 0)) return;
-
-    var boundedIndex = ((nextIndex % size) + size) % size;
-    carousel.setAttribute('data-tiara-carousel-index', String(boundedIndex));
-    track.style.transform = 'translateX(' + String(-boundedIndex * 100) + '%)';
-
-    var slides = carousel.querySelectorAll('[data-tiara-carousel-slide]');
-    for (var i = 0; i < slides.length; i += 1) {
-      slides[i].setAttribute('aria-hidden', i === boundedIndex ? 'false' : 'true');
-    }
-
-    var indicators = carousel.querySelectorAll('[data-tiara-carousel-indicator]');
-    for (var j = 0; j < indicators.length; j += 1) {
-      indicators[j].setAttribute('aria-current', j === boundedIndex ? 'true' : 'false');
-      if (indicators[j].classList) {
-        indicators[j].classList.toggle('is-active', j === boundedIndex);
-      }
-    }
-  }
-
-  function updateTabs(tabs, nextIndex) {
-    if (!tabs) return;
-
-    var triggers = tabs.querySelectorAll('[data-tiara-tabs-index]');
-    var panels = tabs.querySelectorAll('[data-tiara-tabs-panel]');
-    var size = Math.min(triggers.length, panels.length);
-    if (!(size > 0)) return;
-
-    var boundedIndex = ((nextIndex % size) + size) % size;
-    tabs.setAttribute('data-tiara-tabs-index', String(boundedIndex));
-
-    for (var i = 0; i < size; i += 1) {
-      var isActive = i === boundedIndex;
-      triggers[i].setAttribute('aria-selected', isActive ? 'true' : 'false');
-      triggers[i].setAttribute('tabindex', isActive ? '0' : '-1');
-      if (triggers[i].classList) {
-        triggers[i].classList.toggle('is-active', isActive);
-      }
-
-      if (isActive) {
-        panels[i].removeAttribute('hidden');
-        panels[i].setAttribute('aria-hidden', 'false');
-      } else {
-        panels[i].setAttribute('hidden', '');
-        panels[i].setAttribute('aria-hidden', 'true');
-      }
-      if (panels[i].classList) {
-        panels[i].classList.toggle('is-active', isActive);
-      }
-    }
-  }
-
-  function getMotionMs(node, fallbackMs) {
-    if (!node) return fallbackMs;
-    var raw = parseInt(node.getAttribute('data-tiara-motion-ms') || '', 10);
-    if (!(raw > 0)) return fallbackMs;
-    return raw;
-  }
-
-  function openModal(dialog) {
-    if (!dialog) return;
-    var motionMs = getMotionMs(dialog, 220);
-    dialog.style.setProperty('--tiara-motion-ms', String(motionMs) + 'ms');
-
-    if (dialog._tiaraCloseTimer) {
-      clearTimeout(dialog._tiaraCloseTimer);
-      dialog._tiaraCloseTimer = null;
-    }
-
-    if (typeof dialog.showModal === 'function' && !dialog.open) {
-      dialog.showModal();
-    }
-    if (dialog.classList) {
-      dialog.classList.remove('is-closing');
-      dialog.classList.remove('is-opening');
-    }
-    requestAnimationFrame(function () {
-      if (dialog.classList) {
-        dialog.classList.add('is-open');
-      }
-    });
-  }
-
-  function closeModal(dialog) {
-    if (!dialog) return;
-    var motionMs = getMotionMs(dialog, 220);
-    dialog.style.setProperty('--tiara-motion-ms', String(motionMs) + 'ms');
-
-    if (dialog._tiaraCloseTimer) {
-      clearTimeout(dialog._tiaraCloseTimer);
-      dialog._tiaraCloseTimer = null;
-    }
-
-    if (dialog.classList) {
-      dialog.classList.remove('is-open');
-      dialog.classList.add('is-closing');
-    }
-
-    dialog._tiaraCloseTimer = setTimeout(function () {
-      dialog._tiaraCloseTimer = null;
-      if (dialog.classList) {
-        dialog.classList.remove('is-closing');
-      }
-      if (typeof dialog.close === 'function' && dialog.open) {
-        dialog.close();
-      }
-    }, motionMs);
-  }
-
-  function setDropdownOpen(dropdown, isOpen) {
-    if (!dropdown) return;
-
-    var menu = dropdown.querySelector('[data-tiara-dropdown-menu]');
-    var toggle = dropdown.querySelector('[data-tiara-dropdown-toggle]');
-    var motionMs = getMotionMs(dropdown, 180);
-    dropdown.style.setProperty('--tiara-motion-ms', String(motionMs) + 'ms');
-
-    dropdown.setAttribute('data-tiara-dropdown-open', isOpen ? 'true' : 'false');
-
-    if (toggle) {
-      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    }
-
-    if (!menu) return;
-    if (menu._tiaraClosingTimer) {
-      clearTimeout(menu._tiaraClosingTimer);
-      menu._tiaraClosingTimer = null;
-    }
-
-    menu.style.setProperty('--tiara-motion-ms', String(motionMs) + 'ms');
-    if (isOpen) {
-      menu.removeAttribute('hidden');
-      if (menu.classList) {
-        menu.classList.remove('is-closing');
-      }
-      requestAnimationFrame(function () {
-        if (menu.classList) {
-          menu.classList.add('is-open');
-        }
-      });
-    } else {
-      if (menu.hasAttribute('hidden') && (!menu.classList || !menu.classList.contains('is-open'))) {
-        if (menu.classList) {
-          menu.classList.remove('is-closing');
-        }
-        return;
-      }
-      if (menu.classList) {
-        menu.classList.remove('is-open');
-        menu.classList.add('is-closing');
-      }
-      menu._tiaraClosingTimer = setTimeout(function () {
-        if (menu.classList) {
-          menu.classList.remove('is-closing');
-        }
-        menu.setAttribute('hidden', '');
-      }, motionMs);
-    }
-  }
-
-  function closeAllDropdowns(exceptDropdown) {
-    var openDropdowns = document.querySelectorAll('[data-tiara="dropdown"][data-tiara-dropdown-open="true"]');
-    for (var i = 0; i < openDropdowns.length; i += 1) {
-      if (exceptDropdown && openDropdowns[i] === exceptDropdown) {
-        continue;
-      }
-      setDropdownOpen(openDropdowns[i], false);
-    }
-  }
-
-  function hideToast(toast) {
-    if (!toast) return;
-    toast.setAttribute('hidden', '');
-  }
-
-  document.addEventListener('click', function (event) {
-    if (event.target && event.target.matches && event.target.matches('dialog[data-tiara=\"modal\"]')) {
-      closeModal(event.target);
-      return;
-    }
-
-    var opener = event.target.closest('[data-tiara-modal-open]');
-    if (opener) {
-      var dialogId = opener.getAttribute('data-tiara-modal-open');
-      var dialog = document.getElementById(dialogId);
-      if (dialog) {
-        openModal(dialog);
-      }
-      return;
-    }
-
-    var closeButton = event.target.closest('[data-tiara-modal-close]');
-    if (closeButton) {
-      var hostDialog = closeButton.closest('dialog');
-      if (hostDialog) {
-        closeModal(hostDialog);
-      }
-      return;
-    }
-
-    var tabsTrigger = event.target.closest('[data-tiara-tabs-target]');
-    if (tabsTrigger) {
-      var tabsId = tabsTrigger.getAttribute('data-tiara-tabs-target');
-      var tabs = tabsId ? document.getElementById(tabsId) : tabsTrigger.closest('[data-tiara="tabs"]');
-      if (tabs) {
-        var tabIndex = parseInt(tabsTrigger.getAttribute('data-tiara-tabs-index') || '0', 10);
-        updateTabs(tabs, tabIndex);
-      }
-      return;
-    }
-
-    var dropdownToggle = event.target.closest('[data-tiara-dropdown-toggle]');
-    if (dropdownToggle) {
-      var dropdownId = dropdownToggle.getAttribute('data-tiara-dropdown-toggle');
-      var dropdown = dropdownId ? document.getElementById(dropdownId) : dropdownToggle.closest('[data-tiara="dropdown"]');
-      if (dropdown) {
-        var opened = dropdown.getAttribute('data-tiara-dropdown-open') === 'true';
-        closeAllDropdowns(dropdown);
-        setDropdownOpen(dropdown, !opened);
-      }
-      return;
-    }
-
-    var dropdownItem = event.target.closest('[data-tiara-dropdown-item]');
-    if (dropdownItem) {
-      var itemDropdown = dropdownItem.closest('[data-tiara="dropdown"]');
-      if (itemDropdown) {
-        setDropdownOpen(itemDropdown, false);
-      }
-      return;
-    }
-
-    var toastClose = event.target.closest('[data-tiara-toast-close]');
-    if (toastClose) {
-      var toast = toastClose.closest('[data-tiara="toast"]');
-      hideToast(toast);
-      return;
-    }
-
-    var carouselControl = event.target.closest('[data-tiara-carousel-action]');
-    if (carouselControl) {
-      var targetId = carouselControl.getAttribute('data-tiara-carousel-target');
-      var carousel = targetId ? document.getElementById(targetId) : null;
-      if (carousel) {
-        var action = carouselControl.getAttribute('data-tiara-carousel-action');
-        var current = parseInt(carousel.getAttribute('data-tiara-carousel-index') || '0', 10);
-        if (action === 'prev') {
-          updateCarousel(carousel, current - 1);
-        } else if (action === 'next') {
-          updateCarousel(carousel, current + 1);
-        } else if (action === 'go') {
-          var goIndex = parseInt(carouselControl.getAttribute('data-tiara-carousel-go') || '0', 10);
-          updateCarousel(carousel, goIndex);
-        }
-      }
-      return;
-    }
-
-    closeAllDropdowns(null);
-  });
-
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-      closeAllDropdowns(null);
-    }
-  });
-
-  document.addEventListener('cancel', function (event) {
-    if (!event.target || !event.target.matches || !event.target.matches('dialog[data-tiara=\"modal\"]')) {
-      return;
-    }
-    event.preventDefault();
-    closeModal(event.target);
-  }, true);
-
-  document.addEventListener('input', function (event) {
-    var input = event.target;
-    if (!input.matches || !input.matches("input[type='color'][data-tiara-color-input]")) return;
-
-    var previewId = input.getAttribute('data-tiara-color-input');
-    var swatch = document.querySelector("[data-tiara-color-preview='" + previewId + "']");
-    if (swatch) {
-      swatch.style.backgroundColor = input.value;
-    }
-  });
-
-  var carousels = document.querySelectorAll('[data-tiara="carousel"]');
-  for (var m = 0; m < carousels.length; m += 1) {
-    var initialCarouselIndex = parseInt(carousels[m].getAttribute('data-tiara-carousel-index') || '0', 10);
-    updateCarousel(carousels[m], initialCarouselIndex);
-  }
-
-  var tabsList = document.querySelectorAll('[data-tiara="tabs"]');
-  for (var n = 0; n < tabsList.length; n += 1) {
-    var initialTabIndex = parseInt(tabsList[n].getAttribute('data-tiara-tabs-index') || '0', 10);
-    updateTabs(tabsList[n], initialTabIndex);
-  }
-
-  var dropdowns = document.querySelectorAll('[data-tiara="dropdown"]');
-  for (var p = 0; p < dropdowns.length; p += 1) {
-    setDropdownOpen(dropdowns[p], false);
-  }
-
-  var toasts = document.querySelectorAll('[data-tiara="toast"][data-tiara-toast-autohide]');
-  for (var q = 0; q < toasts.length; q += 1) {
-    (function (toastNode) {
-      var hideAfter = parseInt(toastNode.getAttribute('data-tiara-toast-autohide') || '0', 10);
-      if (hideAfter > 0) {
-        setTimeout(function () {
-          hideToast(toastNode);
-        }, hideAfter);
-      }
-    })(toasts[q]);
-  }
-})();
-"""
-
 when defined(js):
+  import std/[dom, strutils, jsffi]
+
+  var tiaraClientReady {.importc: "window.__tiaraClientReady".}: bool
+
+  proc jsTypeof*(x: JsObject): cstring {.importcpp: "typeof #".}
+  proc jsMatches*(node: JsObject, selectors: cstring): bool {.importcpp: "#.matches(#)".}
+  proc jsClosest*(node: JsObject, selectors: cstring): JsObject {.importcpp: "#.closest(#)".}
+  proc jsContains*(list: JsObject, class: cstring): bool {.importcpp: "#.contains(#)".}
+
+  proc hasClassList*(node: Element): bool =
+    let jsNode = node.toJs()
+    return not isUndefined(jsNode.classList) and not isNull(jsNode.classList)
+
+  proc contains*(list: ClassList, class: cstring): bool =
+    return jsContains(list.toJs(), class)
+
+  proc matches*(node: Node | Element | EventTarget, selectors: cstring): bool =
+    let jsNode = node.toJs()
+    if not isUndefined(jsNode) and not isNull(jsNode) and jsTypeof(jsNode[
+        cstring("matches")]) == cstring("function"):
+      return jsMatches(jsNode, selectors)
+    return false
+
+  proc closest*(node: Node | Element | EventTarget,
+      selectors: cstring): Element =
+    let jsNode = node.toJs()
+    if not isUndefined(jsNode) and not isNull(jsNode) and jsTypeof(jsNode[
+        cstring("closest")]) == cstring("function"):
+      let res = jsClosest(jsNode, selectors)
+      if isNull(res) or isUndefined(res): return nil
+      return res.to(Element)
+    return nil
+
+  proc setProperty*(style: Style, prop: cstring, val: cstring) =
+    style.toJs().setProperty(prop, val)
+
+  proc removeAttribute*(node: Element, attr: cstring) =
+    node.toJs().removeAttribute(attr)
+
+  proc hasAttribute*(node: Element, attr: cstring): bool =
+    return node.toJs().hasAttribute(attr).to(bool)
+
+  proc showModal*(dialog: Element) =
+    let jsDialog = dialog.toJs()
+    if jsTypeof(jsDialog.showModal) == cstring("function"):
+      jsDialog.showModal()
+
+  proc closeDialog*(dialog: Element) =
+    let jsDialog = dialog.toJs()
+    if jsTypeof(jsDialog.close) == cstring("function"):
+      jsDialog.close()
+
+  proc isOpen*(dialog: Element): bool =
+    let jsDialog = dialog.toJs()
+    if not isUndefined(jsDialog.open) and not isNull(jsDialog.open):
+      return jsDialog.open.to(bool)
+    return false
+
+  proc requestAnimationFrame*(cb: proc()) {.importc.}
+
+  proc getMotionMs(node: Element, fallbackMs: int): int =
+    if node.isNil: return fallbackMs
+    let rawStr = node.getAttribute("data-tiara-motion-ms")
+    if rawStr.isNil or $rawStr == "": return fallbackMs
+    try:
+      let raw = parseInt($rawStr)
+      if raw > 0: return raw
+    except ValueError:
+      discard
+    return fallbackMs
+
+  proc updateCarousel(carousel: Element, nextIndex: int) =
+    if carousel.isNil: return
+    let track = carousel.querySelector("[data-tiara-carousel-track]")
+    if track.isNil: return
+
+    var size = 0
+    let sizeStr = carousel.getAttribute("data-tiara-carousel-size")
+    if not sizeStr.isNil and $sizeStr != "":
+      try: size = parseInt($sizeStr)
+      except ValueError: discard
+
+    if size <= 0: return
+
+    let boundedIndex = ((nextIndex mod size) + size) mod size
+    carousel.setAttribute("data-tiara-carousel-index", cstring($boundedIndex))
+    track.style.transform = cstring("translateX(" & $(-boundedIndex * 100) & "%)")
+
+    let slides = carousel.querySelectorAll("[data-tiara-carousel-slide]")
+    for i in 0 ..< slides.len:
+      let slide = slides[i]
+      slide.setAttribute("aria-hidden", cstring(if i ==
+          boundedIndex: "false" else: "true"))
+
+    let indicators = carousel.querySelectorAll("[data-tiara-carousel-indicator]")
+    for j in 0 ..< indicators.len:
+      let indicator = indicators[j]
+      indicator.setAttribute("aria-current", cstring(if j ==
+          boundedIndex: "true" else: "false"))
+      if indicator.hasClassList():
+        if j == boundedIndex: indicator.classList.add("is-active")
+        else: indicator.classList.remove("is-active")
+
+  proc updateTabs(tabs: Element, nextIndex: int) =
+    if tabs.isNil: return
+    let triggers = tabs.querySelectorAll("[data-tiara-tabs-index]")
+    let panels = tabs.querySelectorAll("[data-tiara-tabs-panel]")
+    let size = min(triggers.len, panels.len)
+    if size <= 0: return
+
+    let boundedIndex = ((nextIndex mod size) + size) mod size
+    tabs.setAttribute("data-tiara-tabs-index", cstring($boundedIndex))
+
+    for i in 0 ..< size:
+      let isActive = i == boundedIndex
+      let trigger = triggers[i]
+      let panel = panels[i]
+
+      trigger.setAttribute("aria-selected", cstring(
+          if isActive: "true" else: "false"))
+      trigger.setAttribute("tabindex", cstring(if isActive: "0" else: "-1"))
+      if trigger.hasClassList():
+        if isActive: trigger.classList.add("is-active")
+        else: trigger.classList.remove("is-active")
+
+      if isActive:
+        panel.removeAttribute("hidden")
+        panel.setAttribute("aria-hidden", cstring("false"))
+      else:
+        panel.setAttribute("hidden", cstring(""))
+        panel.setAttribute("aria-hidden", cstring("true"))
+
+      if panel.hasClassList():
+        if isActive: panel.classList.add("is-active")
+        else: panel.classList.remove("is-active")
+
+  proc openModal(dialog: Element) =
+    if dialog.isNil: return
+    let motionMs = getMotionMs(dialog, 220)
+    dialog.style.setProperty("--tiara-motion-ms", cstring($motionMs & "ms"))
+
+    let jsDialog = dialog.toJs()
+    if not isUndefined(jsDialog.tiaraCloseTimer) and not isNull(
+        jsDialog.tiaraCloseTimer):
+      window.clearTimeout(jsDialog.tiaraCloseTimer.to(TimeOut))
+      jsDialog.tiaraCloseTimer = jsNull
+
+    if not dialog.isOpen():
+      dialog.showModal()
+
+    if dialog.hasClassList():
+      dialog.classList.remove("is-closing")
+      dialog.classList.remove("is-opening")
+
+    requestAnimationFrame(proc() =
+      if dialog.hasClassList():
+        dialog.classList.add("is-open")
+    )
+
+  proc closeModal(dialog: Element) =
+    if dialog.isNil: return
+    let motionMs = getMotionMs(dialog, 220)
+    dialog.style.setProperty("--tiara-motion-ms", cstring($motionMs & "ms"))
+
+    let jsDialog = dialog.toJs()
+    if not isUndefined(jsDialog.tiaraCloseTimer) and not isNull(
+        jsDialog.tiaraCloseTimer):
+      window.clearTimeout(jsDialog.tiaraCloseTimer.to(TimeOut))
+      jsDialog.tiaraCloseTimer = jsNull
+
+    if dialog.hasClassList():
+      dialog.classList.remove("is-open")
+      dialog.classList.add("is-closing")
+
+    jsDialog.tiaraCloseTimer = window.setTimeout(proc() =
+      jsDialog.tiaraCloseTimer = jsNull
+      if dialog.hasClassList():
+        dialog.classList.remove("is-closing")
+      if dialog.isOpen():
+        dialog.closeDialog()
+    , motionMs)
+
+  proc setDropdownOpen(dropdown: Element, isOpen: bool) =
+    if dropdown.isNil: return
+    let menu = dropdown.querySelector("[data-tiara-dropdown-menu]")
+    let toggle = dropdown.querySelector("[data-tiara-dropdown-toggle]")
+    let motionMs = getMotionMs(dropdown, 180)
+
+    dropdown.style.setProperty("--tiara-motion-ms", cstring($motionMs & "ms"))
+    dropdown.setAttribute("data-tiara-dropdown-open", cstring(
+        if isOpen: "true" else: "false"))
+
+    if not toggle.isNil:
+      toggle.setAttribute("aria-expanded", cstring(
+          if isOpen: "true" else: "false"))
+
+    if menu.isNil: return
+    let jsMenu = menu.toJs()
+    if not isUndefined(jsMenu.tiaraClosingTimer) and not isNull(
+        jsMenu.tiaraClosingTimer):
+      window.clearTimeout(jsMenu.tiaraClosingTimer.to(TimeOut))
+      jsMenu.tiaraClosingTimer = jsNull
+
+    menu.style.setProperty("--tiara-motion-ms", cstring($motionMs & "ms"))
+    if isOpen:
+      menu.removeAttribute("hidden")
+      if menu.hasClassList():
+        menu.classList.remove("is-closing")
+      requestAnimationFrame(proc() =
+        if menu.hasClassList():
+          menu.classList.add("is-open")
+      )
+    else:
+      if menu.hasAttribute("hidden") and (not menu.hasClassList() or
+          not menu.classList.contains("is-open")):
+        if menu.hasClassList():
+          menu.classList.remove("is-closing")
+        return
+
+      if menu.hasClassList():
+        menu.classList.remove("is-open")
+        menu.classList.add("is-closing")
+
+      jsMenu.tiaraClosingTimer = window.setTimeout(proc() =
+        if menu.hasClassList():
+          menu.classList.remove("is-closing")
+        menu.setAttribute("hidden", cstring(""))
+      , motionMs)
+
+  proc closeAllDropdowns(exceptDropdown: Element) =
+    let openDropdowns = document.querySelectorAll("[data-tiara=\"dropdown\"][data-tiara-dropdown-open=\"true\"]")
+    for i in 0 ..< openDropdowns.len:
+      let drop = openDropdowns[i]
+      if not exceptDropdown.isNil and drop == exceptDropdown:
+        continue
+      setDropdownOpen(drop, false)
+
+  proc hideToast(toast: Element) =
+    if not toast.isNil:
+      toast.setAttribute("hidden", cstring(""))
+
   proc initTiaraClient*() =
-    {.emit: TiaraClientBundle.}
+    if tiaraClientReady: return
+    tiaraClientReady = true
+
+    document.addEventListener("click", proc(event: Event) =
+      let target = event.target
+      if target.matches("dialog[data-tiara=\"modal\"]"):
+        closeModal(target.Element)
+        return
+
+      let opener = target.closest("[data-tiara-modal-open]")
+      if not opener.isNil:
+        let dialogId = opener.getAttribute("data-tiara-modal-open")
+        if not dialogId.isNil:
+          let dialog = document.getElementById($dialogId)
+          if not dialog.isNil: openModal(dialog.Element)
+        return
+
+      let closeButton = target.closest("[data-tiara-modal-close]")
+      if not closeButton.isNil:
+        let hostDialog = closeButton.closest("dialog")
+        if not hostDialog.isNil: closeModal(hostDialog.Element)
+        return
+
+      let tabsTrigger = target.closest("[data-tiara-tabs-target]")
+      if not tabsTrigger.isNil:
+        let tabsId = tabsTrigger.getAttribute("data-tiara-tabs-target")
+        var tabs: Element = nil
+        if not tabsId.isNil and $tabsId != "":
+          tabs = document.getElementById($tabsId).Element
+        else:
+          let tNode = tabsTrigger.closest("[data-tiara=\"tabs\"]")
+          if not tNode.isNil: tabs = tNode.Element
+
+        if not tabs.isNil:
+          let tabIndexStr = tabsTrigger.getAttribute("data-tiara-tabs-index")
+          var tabIndex = 0
+          if not tabIndexStr.isNil and $tabIndexStr != "":
+            try: tabIndex = parseInt($tabIndexStr)
+            except ValueError: discard
+          updateTabs(tabs, tabIndex)
+        return
+
+      let dropdownToggle = target.closest("[data-tiara-dropdown-toggle]")
+      if not dropdownToggle.isNil:
+        let dropdownId = dropdownToggle.getAttribute("data-tiara-dropdown-toggle")
+        var dropdown: Element = nil
+        if not dropdownId.isNil and $dropdownId != "":
+          dropdown = document.getElementById($dropdownId).Element
+        else:
+          let dNode = dropdownToggle.closest("[data-tiara=\"dropdown\"]")
+          if not dNode.isNil: dropdown = dNode.Element
+
+        if not dropdown.isNil:
+          let openedStr = dropdown.getAttribute("data-tiara-dropdown-open")
+          let opened = not openedStr.isNil and $openedStr == "true"
+          closeAllDropdowns(dropdown)
+          setDropdownOpen(dropdown, not opened)
+        return
+
+      let dropdownItem = target.closest("[data-tiara-dropdown-item]")
+      if not dropdownItem.isNil:
+        let itemDropdown = dropdownItem.closest("[data-tiara=\"dropdown\"]")
+        if not itemDropdown.isNil:
+          setDropdownOpen(itemDropdown.Element, false)
+        return
+
+      let toastClose = target.closest("[data-tiara-toast-close]")
+      if not toastClose.isNil:
+        let toast = toastClose.closest("[data-tiara=\"toast\"]")
+        if not toast.isNil:
+          hideToast(toast.Element)
+        return
+
+      let carouselControl = target.closest("[data-tiara-carousel-action]")
+      if not carouselControl.isNil:
+        let targetId = carouselControl.getAttribute("data-tiara-carousel-target")
+        var carousel: Element = nil
+        if not targetId.isNil and $targetId != "":
+          carousel = document.getElementById($targetId).Element
+
+        if not carousel.isNil:
+          let action = carouselControl.getAttribute("data-tiara-carousel-action")
+          let currentStr = carousel.getAttribute("data-tiara-carousel-index")
+          var current = 0
+          if not currentStr.isNil and $currentStr != "":
+            try: current = parseInt($currentStr)
+            except ValueError: discard
+
+          if not action.isNil:
+            if $action == "prev":
+              updateCarousel(carousel, current - 1)
+            elif $action == "next":
+              updateCarousel(carousel, current + 1)
+            elif $action == "go":
+              let goIndexStr = carouselControl.getAttribute("data-tiara-carousel-go")
+              if not goIndexStr.isNil and $goIndexStr != "":
+                try:
+                  let goIndex = parseInt($goIndexStr)
+                  updateCarousel(carousel, goIndex)
+                except ValueError: discard
+        return
+
+      closeAllDropdowns(nil)
+    )
+
+    document.addEventListener("keydown", proc(event: Event) =
+      let kEvent = cast[KeyboardEvent](event)
+      if $kEvent.key == "Escape":
+        closeAllDropdowns(nil)
+    )
+
+    document.addEventListener("cancel", proc(event: Event) =
+      let target = event.target
+      if target.matches("dialog[data-tiara=\"modal\"]"):
+        event.preventDefault()
+        closeModal(target.Element)
+    , true)
+
+    document.addEventListener("input", proc(event: Event) =
+      let inputEl = event.target.Element
+      if inputEl.matches("input[type='color'][data-tiara-color-input]"):
+        let previewId = inputEl.getAttribute("data-tiara-color-input")
+        if not previewId.isNil:
+          let swatch = document.querySelector("[data-tiara-color-preview='" &
+              $previewId & "']")
+          if not swatch.isNil:
+            swatch.style.backgroundColor = inputEl.toJs().value.to(cstring)
+    )
+
+    let carousels = document.querySelectorAll("[data-tiara=\"carousel\"]")
+    for i in 0 ..< carousels.len:
+      let c = carousels[i]
+      let initStr = c.getAttribute("data-tiara-carousel-index")
+      var initialCarouselIndex = 0
+      if not initStr.isNil and $initStr != "":
+        try: initialCarouselIndex = parseInt($initStr)
+        except ValueError: discard
+      updateCarousel(c, initialCarouselIndex)
+
+    let tabsList = document.querySelectorAll("[data-tiara=\"tabs\"]")
+    for i in 0 ..< tabsList.len:
+      let t = tabsList[i]
+      let initStr = t.getAttribute("data-tiara-tabs-index")
+      var initialTabIndex = 0
+      if not initStr.isNil and $initStr != "":
+        try: initialTabIndex = parseInt($initStr)
+        except ValueError: discard
+      updateTabs(t, initialTabIndex)
+
+    let dropdowns = document.querySelectorAll("[data-tiara=\"dropdown\"]")
+    for i in 0 ..< dropdowns.len:
+      setDropdownOpen(dropdowns[i], false)
+
+    let toasts = document.querySelectorAll("[data-tiara=\"toast\"][data-tiara-toast-autohide]")
+    for i in 0 ..< toasts.len:
+      let toastNode = toasts[i]
+      let hideAfterStr = toastNode.getAttribute("data-tiara-toast-autohide")
+      var hideAfter = 0
+      if not hideAfterStr.isNil and $hideAfterStr != "":
+        try: hideAfter = parseInt($hideAfterStr)
+        except ValueError: discard
+
+      if hideAfter > 0:
+        discard window.setTimeout(proc() =
+          hideToast(toastNode)
+        , hideAfter)
 
   initTiaraClient()
+
 else:
+  const TiaraClientBundle* = slurp("client.js")
   proc initTiaraClient*() =
     discard
