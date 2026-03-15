@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tiara Component Catalog</title>
+</head>
+<body>
+<style>
+.btn { border: 1px solid transparent; border-radius: 0.5rem; cursor: pointer; font-weight: 600; padding: 0.5rem 0.875rem; }
+.btn-primary { background: #0f62fe; border-color: #0f62fe; color: #fff; }
+.btn-secondary { background: #f2f4f8; border-color: #d0d7e2; color: #1f2937; }
+.btn-small { font-size: 0.875rem; padding: 0.375rem 0.75rem; }
+.btn-medium { font-size: 1rem; }
+.btn-large { font-size: 1.125rem; padding: 0.625rem 1rem; }
+.btn-outline { background: transparent; color: inherit; }
+
+.badge { align-items: center; border: 1px solid transparent; border-radius: 9999px; display: inline-flex; font-weight: 600; gap: 0.35rem; white-space: nowrap; }
+.badge-small { font-size: 0.72rem; padding: 0.18rem 0.52rem; }
+.badge-medium { font-size: 0.82rem; padding: 0.28rem 0.68rem; }
+.badge-large { font-size: 0.92rem; padding: 0.38rem 0.82rem; }
+.badge-soft.badge-neutral { background: #eef2ff; color: #334155; }
+.badge-soft.badge-accent { background: #f5d0fe; color: #7c3aed; }
+.badge-soft.badge-success { background: #dcfce7; color: #166534; }
+.badge-soft.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-solid.badge-neutral { background: #334155; color: #fff; }
+.badge-solid.badge-accent { background: #7c3aed; color: #fff; }
+.badge-solid.badge-success { background: #16a34a; color: #fff; }
+.badge-solid.badge-warning { background: #d97706; color: #fff; }
+.badge-outline.badge-neutral { background: transparent; border-color: #cbd5e1; color: #334155; }
+.badge-outline.badge-accent { background: transparent; border-color: #c084fc; color: #7c3aed; }
+.badge-outline.badge-success { background: transparent; border-color: #86efac; color: #166534; }
+.badge-outline.badge-warning { background: transparent; border-color: #fcd34d; color: #92400e; }
+
+.container { margin: 0 auto; padding-inline: 1rem; width: min(100%, 1200px); }
+.container-xl { width: min(100%, 1280px); }
+
+.navbar { align-items: center; display: flex; gap: 1rem; justify-content: space-between; }
+.navbar-small { padding: 0.65rem 0.9rem; }
+.navbar-medium { padding: 0.95rem 1.15rem; }
+.navbar-large { padding: 1.15rem 1.35rem; }
+.navbar-glass { backdrop-filter: blur(16px); background: rgba(255, 255, 255, 0.68); border: 1px solid rgba(148, 163, 184, 0.24); border-radius: 1rem; box-shadow: 0 16px 42px rgba(15, 23, 42, 0.12); }
+.navbar-solid { background: #fff; border: 1px solid #e2e8f0; border-radius: 1rem; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); }
+.navbar-minimal { background: transparent; }
+.nav-brand { color: #0f172a; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.03em; text-decoration: none; }
+.nav-links { align-items: center; display: flex; flex-wrap: wrap; gap: 1rem; }
+.nav-link { color: #475569; font-weight: 500; text-decoration: none; }
+
+.hero { align-items: center; display: grid; gap: 2rem; }
+.hero-split { grid-template-columns: minmax(0, 1fr) minmax(280px, 0.95fr); }
+.hero-stacked { justify-items: center; text-align: center; }
+.hero-align-center .hero-content { margin-inline: auto; text-align: center; }
+.hero-content { display: grid; gap: 1rem; max-width: 40rem; }
+.hero-title { color: #0f172a; font-size: clamp(2.25rem, 5vw, 4.25rem); letter-spacing: -0.04em; line-height: 1.02; margin: 0; }
+.hero-description { color: #475569; font-size: 1.05rem; margin: 0; }
+.hero-badges { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.hero-visual { width: 100%; }
+
+.section-header { align-items: end; display: flex; gap: 1rem; justify-content: space-between; }
+.section-header-center { align-items: center; flex-direction: column; text-align: center; }
+.section-header-small .section-title { font-size: 1.55rem; }
+.section-header-medium .section-title { font-size: 2rem; }
+.section-header-large .section-title { font-size: clamp(2.1rem, 4vw, 3rem); }
+.section-kicker { color: #7c3aed; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.18em; margin: 0 0 0.7rem; text-transform: uppercase; }
+.section-title { color: #0f172a; letter-spacing: -0.04em; line-height: 1.08; margin: 0; }
+.section-title-left { text-align: left; }
+.section-description { color: #475569; margin: 0.8rem 0 0; max-width: 38rem; }
+.section-header-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 0.75rem; box-shadow: 0 8px 24px rgba(0,0,0,.06); padding: 1rem; }
+.card-title { font-size: 1.125rem; margin: 0 0 0.75rem; }
+.card-content { color: #374151; }
+.card-elevated { box-shadow: 0 20px 48px rgba(15, 23, 42, 0.14); }
+.card-outline { border-color: #cbd5e1; box-shadow: none; }
+.card-glass { backdrop-filter: blur(16px); background: rgba(15, 23, 42, 0.72); border-color: rgba(148, 163, 184, 0.22); box-shadow: 0 22px 50px rgba(2, 6, 23, 0.28); }
+.card-glass .card-title { color: #f8fafc; }
+.card-glass .card-content { color: #cbd5e1; }
+
+.field { display: grid; gap: 0.5rem; }
+.field-label { color: #374151; font-size: 0.875rem; font-weight: 500; }
+.input { border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
+.field-color { align-items: center; grid-template-columns: 1fr auto; }
+.color-preview { border: 1px solid #d1d5db; border-radius: 9999px; display: inline-block; height: 1.5rem; width: 1.5rem; }
+
+.search-box { display: grid; gap: 0.5rem; }
+.search-box-control { align-items: center; display: flex; gap: 0.75rem; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+.search-box-icon { color: #64748b; font-size: 0.95rem; }
+.search-box-input { background: transparent; border: none; color: #0f172a; flex: 1; font: inherit; outline: none; }
+.search-box-input::placeholder { color: #94a3b8; }
+.search-box-subtle .search-box-control { background: #f8fafc; border: 1px solid #e2e8f0; }
+.search-box-outline .search-box-control { background: #fff; border: 1px solid #cbd5e1; }
+.search-box-ghost .search-box-control { background: transparent; border: 1px dashed #cbd5e1; }
+.search-box-small .search-box-control { border-radius: 0.75rem; padding: 0.55rem 0.75rem; }
+.search-box-medium .search-box-control { border-radius: 0.9rem; padding: 0.75rem 0.9rem; }
+.search-box-large .search-box-control { border-radius: 1rem; padding: 0.95rem 1.1rem; }
+.search-box .search-box-control:focus-within { border-color: #a855f7; box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.12); }
+
+.modal { --tiara-motion-ms: 220ms; border: none; border-radius: 0.75rem; max-width: 36rem; opacity: 0; padding: 1rem; transform: translateY(10px) scale(0.985); transition: opacity var(--tiara-motion-ms) cubic-bezier(0.2, 0.7, 0.2, 1), transform var(--tiara-motion-ms) cubic-bezier(0.2, 0.7, 0.2, 1); width: calc(100% - 2rem); }
+.modal-medium { max-width: 36rem; }
+.modal-small { max-width: 26rem; }
+.modal-large { max-width: 48rem; }
+.modal::backdrop { background: rgba(15, 23, 42, 0); transition: background var(--tiara-motion-ms) ease; }
+.modal.is-open { opacity: 1; transform: translateY(0) scale(1); }
+.modal.is-open::backdrop { background: rgba(15, 23, 42, 0.55); }
+.modal-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+
+.code-block { background: #0b1120; border-radius: 0.75rem; color: #dbeafe; margin: 0; overflow: hidden; }
+.code-block-terminal { background: #070b16; }
+.code-block-header { align-items: center; background: #111827; display: flex; justify-content: space-between; padding: 0.5rem 0.75rem; }
+.code-block-header-terminal { background: #0f172a; }
+.code-block-header-main { align-items: center; display: flex; gap: 0.65rem; min-width: 0; }
+.code-block-traffic { align-items: center; display: inline-flex; gap: 0.35rem; }
+.code-block-dot { border-radius: 9999px; display: inline-block; height: 0.65rem; width: 0.65rem; }
+.code-block-dot-red { background: #fb7185; }
+.code-block-dot-yellow { background: #fbbf24; }
+.code-block-dot-green { background: #34d399; }
+.code-block-title { color: #e5e7eb; font-size: 0.875rem; font-weight: 600; }
+.code-block-language { color: #9ca3af; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.75rem; letter-spacing: 0.06em; }
+.code-block-pre { margin: 0; overflow-x: auto; padding: 0.875rem; }
+.code-block-code { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.875rem; line-height: 1.5; white-space: pre; }
+.code-token.code-keyword { color: #c4b5fd; }
+.code-token.code-string { color: #fde68a; }
+.code-token.code-number { color: #67e8f9; }
+.code-token.code-comment { color: #6b7280; font-style: italic; }
+
+.icon-badge { align-items: center; border: none; display: inline-flex; justify-content: center; position: relative; }
+.icon-badge-icon { font-size: 1.25rem; line-height: 1; color: #475569; }
+.icon-badge-count { background: #ef4444; border-radius: 9999px; color: #fff; font-size: 0.65rem; font-weight: 600; min-width: 1rem; padding: 0.1rem 0.3rem; position: absolute; right: -0.25rem; text-align: center; top: -0.25rem; }
+.notification-icon { background: #f1f5f9; border: none; border-radius: 0.5rem; cursor: pointer; padding: 0.5rem; color: #475569; transition: background 150ms ease; }
+.notification-icon:hover { background: #e2e8f0; }
+
+.carousel { border-radius: 0.75rem; overflow: hidden; position: relative; }
+.carousel-track { display: flex; transition: transform 220ms ease-out; }
+.carousel-slide { flex: 0 0 100%; min-width: 100%; }
+.carousel-nav { align-items: center; background: rgba(15, 23, 42, 0.6); border: none; border-radius: 9999px; color: #fff; cursor: pointer; display: inline-flex; font-size: 1rem; height: 2rem; justify-content: center; position: absolute; top: calc(50% - 1rem); width: 2rem; }
+.carousel-nav-prev { left: 0.5rem; }
+.carousel-nav-next { right: 0.5rem; }
+.carousel-indicators { bottom: 0.5rem; display: flex; gap: 0.35rem; left: 50%; position: absolute; transform: translateX(-50%); }
+.carousel-indicator { background: rgba(255, 255, 255, 0.55); border: none; border-radius: 9999px; cursor: pointer; height: 0.45rem; width: 0.45rem; }
+.carousel-indicator.is-active { background: #fff; width: 1rem; }
+
+.profile-icon { align-items: center; background: #e2e8f0; border-radius: 9999px; color: #475569; display: inline-flex; font-weight: 600; justify-content: center; overflow: hidden; position: relative; text-transform: uppercase; }
+.profile-icon-small { font-size: 0.75rem; height: 1.75rem; width: 1.75rem; }
+.profile-icon-medium { font-size: 1rem; height: 2.5rem; width: 2.5rem; }
+.profile-icon-large { font-size: 1.25rem; height: 3.25rem; width: 3.25rem; }
+.profile-icon-image { display: block; height: 100%; object-fit: cover; width: 100%; }
+.profile-icon-status { border: 2px solid #fff; border-radius: 9999px; bottom: 0; height: 0.65rem; position: absolute; right: 0; width: 0.65rem; }
+.profile-icon-status-online { background: #10b981; }
+.profile-icon-status-busy { background: #ef4444; }
+.profile-icon-status-away { background: #f59e0b; }
+
+.tabs { border: 1px solid #e5e7eb; border-radius: 0.75rem; overflow: hidden; }
+.tabs-list { background: #f8fafc; border-bottom: 1px solid #e5e7eb; display: flex; gap: 0.25rem; padding: 0.35rem; }
+.tabs-trigger { background: transparent; border: none; border-radius: 0.5rem; color: #64748b; cursor: pointer; font-weight: 600; padding: 0.5rem 0.75rem; }
+.tabs-trigger.is-active { background: #fff; color: #0f172a; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1); }
+.tabs-panels { padding: 0.875rem; }
+.tabs-panel { color: #334155; }
+
+.dropdown { --tiara-motion-ms: 180ms; display: inline-block; position: relative; }
+.dropdown-toggle { align-items: center; background: #fff; border: 1px solid #d1d5db; border-radius: 0.625rem; cursor: pointer; display: inline-flex; gap: 0.5rem; padding: 0.45rem 0.75rem; }
+.dropdown-small .dropdown-toggle { font-size: 0.82rem; padding: 0.35rem 0.65rem; }
+.dropdown-large .dropdown-toggle { font-size: 1rem; padding: 0.6rem 0.9rem; }
+.dropdown-menu { --tiara-dropdown-x: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 0.625rem; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14); list-style: none; margin: 0.45rem 0 0; min-width: 12rem; opacity: 0; padding: 0.35rem; pointer-events: none; position: absolute; transform: translate(var(--tiara-dropdown-x), -6px) scale(0.985); transform-origin: top; transition: opacity var(--tiara-motion-ms) ease, transform var(--tiara-motion-ms) ease; z-index: 20; }
+.dropdown-menu.is-open { opacity: 1; pointer-events: auto; transform: translate(var(--tiara-dropdown-x), 0) scale(1); }
+.dropdown-menu.is-closing { opacity: 0; pointer-events: none; transform: translate(var(--tiara-dropdown-x), -4px) scale(0.985); }
+.dropdown-menu-left { left: 0; --tiara-dropdown-x: 0; }
+.dropdown-menu-right { right: 0; --tiara-dropdown-x: 0; }
+.dropdown-menu-center { left: 50%; --tiara-dropdown-x: -50%; }
+.dropdown-item { border-radius: 0.5rem; margin: 0; padding: 0.4rem 0.55rem; }
+.dropdown-item:hover { background: #f1f5f9; }
+.dropdown-item.is-disabled { color: #9ca3af; }
+
+.toast { align-items: flex-start; border: 1px solid transparent; border-radius: 0.75rem; display: flex; gap: 0.625rem; max-width: 26rem; padding: 0.75rem 0.875rem; opacity: 0; transform: translateY(10px); transition: opacity 0.3s ease, transform 0.3s ease; }
+.toast.is-open { opacity: 1; transform: translateY(0); }
+.toast.is-closing { opacity: 0; transform: translateY(-10px); }
+.toast-wrapper { position: fixed; z-index: 50; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+.toast-wrapper > * { pointer-events: auto; }
+.toast-top-right { top: 1rem; right: 1rem; }
+.toast-top-left { top: 1rem; left: 1rem; }
+.toast-bottom-right { bottom: 1rem; right: 1rem; }
+.toast-bottom-left { bottom: 1rem; left: 1rem; }
+.toast-top-center { top: 1rem; left: 50%; transform: translateX(-50%); }
+.toast-bottom-center { bottom: 1rem; left: 50%; transform: translateX(-50%); }
+.toast-content { display: grid; gap: 0.15rem; }
+.toast-title { color: #0f172a; font-size: 0.9rem; font-weight: 600; }
+.toast-message { color: #334155; font-size: 0.875rem; }
+.toast-close { background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 0.875rem; line-height: 1; padding: 0.125rem; }
+.toast-info { background: #eff6ff; border-color: #bfdbfe; }
+.toast-success { background: #ecfdf5; border-color: #86efac; }
+.toast-warning { background: #fffbeb; border-color: #fcd34d; }
+.toast-error { background: #fef2f2; border-color: #fca5a5; }
+
+@media (max-width: 720px) {
+  .navbar { align-items: flex-start; flex-direction: column; }
+  .hero-split { grid-template-columns: 1fr; }
+  .section-header { align-items: flex-start; flex-direction: column; }
+  .section-header-center { align-items: center; }
+}
+</style>
+<style>
+:root { color-scheme: light; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #dbeafe, #f8fafc 36%, #eef2ff 100%);
+  color: #0f172a;
+  font-family: \"Avenir Next\", \"Hiragino Sans\", \"Noto Sans JP\", sans-serif;
+  line-height: 1.5;
+}
+.page-wrap { padding: 2.5rem 0 4rem; }
+.page-title { font-size: clamp(1.5rem, 2.6vw, 2.4rem); margin: 0 0 0.4rem; }
+.page-description { color: #334155; margin: 0 0 1.25rem; }
+.demo-section { margin-bottom: 1rem; }
+.stack { display: grid; gap: 0.875rem; }
+.showcase-row { align-items: center; display: flex; flex-wrap: wrap; gap: 0.9rem; }
+.showcase-grid { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.tabs, .dropdown, .toast, .carousel, .code-block { width: 100%; }
+.navbar, .hero, .section-header { width: 100%; }
+</style>
+<main class="page-wrap"><div class="container container-xl"><h1 class="page-title">Tiara Component Catalog</h1><p class="page-description">Explore the same components shipped in the current repository, with live previews and implementation-ready examples.</p><div class="showcase-row"><span class="badge badge-accent badge-solid badge-medium" data-tiara="badge">15 component groups</span><span class="badge badge-success badge-soft badge-medium" data-tiara="badge">Interactive demos</span><span class="badge badge-warning badge-outline badge-medium" data-tiara="badge">SSR-first</span></div><section class="demo-section"><section class="card"><h3 class="card-title">Navbar</h3><div class="card-content"><nav class="navbar navbar-glass navbar-medium" data-tiara="navbar"><a href="/" class="nav-brand">👑 Tiara</a><div class="nav-links"><a href="#" class="nav-link">Home</a><a href="#" class="nav-link">Docs</a><a href="#" class="nav-link">Components</a><a href="https://github.com/nimmer-jp/tiara" class="btn btn-secondary btn-medium btn-outline">GitHub</a></div></nav></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Hero</h3><div class="card-content"><section class="hero hero-split hero-align-left" data-tiara="hero"><div class="hero-content"><p class="section-kicker">Marketing UI</p><h1 class="hero-title">Ship <span style="color:#7c3aed;">search-ready</span> Nim websites.</h1><p class="hero-description">New website-facing primitives make landing pages, docs hubs, and install guides easier to compose directly from Tiara.</p><div class="hero-badges"><span class="badge badge-accent badge-soft badge-small hero-badge" data-tiara="badge">SSR-first</span><span class="badge badge-accent badge-soft badge-small hero-badge" data-tiara="badge">Docs Search</span><span class="badge badge-accent badge-soft badge-small hero-badge" data-tiara="badge">Nimble Install</span></div><div class="hero-actions"><button class="btn btn-primary btn-medium">Open Docs</button><button class="btn btn-secondary btn-medium btn-outline">Try Search</button></div></div><div class="hero-visual"><figure class="code-block code-block-terminal" data-tiara="code-block"><figcaption class="code-block-header code-block-header-terminal"><div class="code-block-header-main"><span class="code-block-traffic" aria-hidden="true"><span class="code-block-dot code-block-dot-red"></span><span class="code-block-dot code-block-dot-yellow"></span><span class="code-block-dot code-block-dot-green"></span></span><span class="code-block-title">terminal</span></div><span class="code-block-language">SH</span></figcaption><pre class="code-block-pre"><code class="code-block-code language-sh">nimble install tiara</code></pre></figure></div></section></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Buttons</h3><div class="card-content"><div class="showcase-row"><button class="btn btn-primary btn-medium">Primary</button><button class="btn btn-secondary btn-medium">Secondary</button><button class="btn btn-primary btn-medium btn-outline">Outline</button><button class="btn btn-primary btn-large">Large</button></div></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Badges</h3><div class="card-content"><div class="showcase-row"><span class="badge badge-neutral badge-soft badge-medium" data-tiara="badge">Neutral</span><span class="badge badge-accent badge-soft badge-medium" data-tiara="badge">Accent</span><span class="badge badge-success badge-solid badge-medium" data-tiara="badge">Success</span><span class="badge badge-warning badge-outline badge-medium" data-tiara="badge">Warning</span></div></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Section Headers</h3><div class="card-content"><div class="stack"><header class="section-header section-header-left section-header-medium" data-tiara="section-header"><div class="section-header-copy"><p class="section-kicker">Section Header</p><h2 class="section-title section-title-left">Documentation sections</h2><p class="section-description">Use consistent kickers, titles, and actions across guides and component indexes.</p></div><div class="section-header-actions"><span class="badge badge-accent badge-solid badge-medium" data-tiara="badge">Beta</span><button class="btn btn-primary btn-small">Explore</button></div></header><header class="section-header section-header-center section-header-large" data-tiara="section-header"><div class="section-header-copy"><p class="section-kicker">Variation</p><h2 class="section-title">Centered variation</h2><p class="section-description">The same primitive can also anchor a centered marketing block.</p></div></header></div></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Search Boxes</h3><div class="card-content"><div class="stack" style="max-width: 34rem;"><div class="search-box search-box-subtle search-box-medium" data-tiara="search-box"><label for="tiara-search-docs-search" class="field-label">Documentation Search</label><div class="search-box-control"><span class="search-box-icon" aria-hidden="true">⌕</span><input id="tiara-search-docs-search" name="docs-search" type="search" class="search-box-input" placeholder="Search installation, toast, customization..." aria-label="Documentation Search" autocomplete="off" spellcheck="false" /></div></div><div class="search-box search-box-outline search-box-large" data-tiara="search-box"><div class="search-box-control"><span class="search-box-icon" aria-hidden="true">⌕</span><input id="tiara-search-component-search" name="component-search" type="search" class="search-box-input" placeholder="Search components..." aria-label="Search components..." autocomplete="off" spellcheck="false" /></div></div></div></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Forms</h3><div class="card-content"><div class="stack"><div class="field"><label for="tiara-username" class="field-label">Username</label><input id="tiara-username" name="username" type="text" class="input" placeholder="tiara-user" /></div><div class="field field-date"><label for="tiara-date-birthdate" class="field-label">Birthdate</label><input id="tiara-date-birthdate" name="birthdate" type="date" class="input input-date" data-tiara="date-picker" min="1900-01-01" max="2026-03-08" /></div><div class="field field-color"><label for="tiara-color-theme" class="field-label">Theme Color</label><input id="tiara-color-theme" name="theme" type="color" value="#2563eb" class="input input-color" data-tiara="color-picker" data-tiara-color-input="tiara-color-theme" /><span class="color-preview" data-tiara-color-preview="tiara-color-theme" style="background-color: #2563eb"></span></div></div></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Modal</h3><div class="card-content"><span class="modal-trigger" data-tiara-modal-open="preview-modal"><button class="btn btn-secondary btn-medium">Open Modal</button></span><dialog id="preview-modal" class="modal modal-medium" data-tiara="modal" data-tiara-motion-ms="220"><h2 class="modal-title">Tiara Modal</h2><div class="modal-content"><p>This modal is controlled by tiara_client.js</p></div><div class="modal-actions"><button class="btn btn-secondary btn-small" type="button" data-tiara-modal-close="preview-modal">閉じる</button></div></dialog></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Code Block</h3><div class="card-content"><figure class="code-block" data-tiara="code-block"><figcaption class="code-block-header"><div class="code-block-header-main"><span class="code-block-title">sample.nim</span></div><span class="code-block-language">NIM</span></figcaption><pre class="code-block-pre"><code class="code-block-code language-nim"><span class="code-token code-keyword">proc</span> hello(name: string): string =
+  <span class="code-token code-keyword">let</span> answer = <span class="code-token code-number">42</span> <span class="code-token code-comment"># sample</span>
+  result = <span class="code-token code-string">&quot;Hi, &quot;</span> &amp; name</code></pre></figure></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Card Variants</h3><div class="card-content"><div class="showcase-grid"><section class="card"><h3 class="card-title">Default</h3><div class="card-content"><p>Balanced surface for app UI and internal tools.</p></div></section><section class="card card-elevated"><h3 class="card-title">Elevated</h3><div class="card-content"><p>A stronger shadow helps distinguish featured content.</p></div></section><section class="card card-outline"><h3 class="card-title">Outline</h3><div class="card-content"><p>Subtle presentation for secondary content blocks.</p></div></section><section class="card card-glass"><h3 class="card-title">Glass</h3><div class="card-content"><p>Marketing-style translucent surface for hero callouts.</p></div></section></div></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Badges &amp; Profile Icons</h3><div class="card-content"><div class="showcase-row"><span class="icon-badge" data-tiara="icon-badge" aria-label="Inbox"><span class="icon-badge-icon" aria-hidden="true"><span>✉</span></span><span class="icon-badge-count">12</span></span><button type="button" class="icon-badge notification-icon" data-tiara="notification-icon" aria-label="Notifications"><span class="icon-badge-icon" aria-hidden="true">🔔</span><span class="icon-badge-count">5</span></button><span class="profile-icon profile-icon-medium" data-tiara="profile-icon" title="Jane Doe"><span class="profile-icon-initials">JD</span><span class="profile-icon-status profile-icon-status-online" title="online"></span></span><span class="profile-icon profile-icon-large" data-tiara="profile-icon" title="Ken Watanabe"><span class="profile-icon-initials">KW</span><span class="profile-icon-status profile-icon-status-away" title="away"></span></span></div></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Carousel</h3><div class="card-content"><section id="feature-carousel" class="carousel" data-tiara="carousel" data-tiara-carousel-index="0" data-tiara-carousel-size="3"><div class="carousel-track" data-tiara-carousel-track style="transform: translateX(0%);"><article class="carousel-slide" data-tiara-carousel-slide="0" aria-hidden="false"><section class="card"><h3 class="card-title">Fast SSR</h3><div class="card-content"><p>Compile-time optimized HTML rendering.</p></div></section></article><article class="carousel-slide" data-tiara-carousel-slide="1" aria-hidden="true"><section class="card"><h3 class="card-title">Pure Nim</h3><div class="card-content"><p>No external JS framework required.</p></div></section></article><article class="carousel-slide" data-tiara-carousel-slide="2" aria-hidden="true"><section class="card"><h3 class="card-title">Progressive</h3><div class="card-content"><p>Interactive widgets powered by tiny Nim-to-JS.</p></div></section></article></div><button type="button" class="carousel-nav carousel-nav-prev" aria-label="Previous slide" data-tiara-carousel-action="prev" data-tiara-carousel-target="feature-carousel">‹</button><button type="button" class="carousel-nav carousel-nav-next" aria-label="Next slide" data-tiara-carousel-action="next" data-tiara-carousel-target="feature-carousel">›</button><div class="carousel-indicators"><button type="button" class="carousel-indicator is-active" data-tiara-carousel-action="go" data-tiara-carousel-target="feature-carousel" data-tiara-carousel-go="0" data-tiara-carousel-indicator="0" aria-label="Go to slide 1" aria-current="true"></button><button type="button" class="carousel-indicator" data-tiara-carousel-action="go" data-tiara-carousel-target="feature-carousel" data-tiara-carousel-go="1" data-tiara-carousel-indicator="1" aria-label="Go to slide 2" aria-current="false"></button><button type="button" class="carousel-indicator" data-tiara-carousel-action="go" data-tiara-carousel-target="feature-carousel" data-tiara-carousel-go="2" data-tiara-carousel-indicator="2" aria-label="Go to slide 3" aria-current="false"></button></div></section></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Tabs</h3><div class="card-content"><section id="overview-tabs" class="tabs" data-tiara="tabs" data-tiara-tabs-index="0" data-tiara-tabs-size="3"><div class="tabs-list" role="tablist"><button id="overview-tabs-tab-0" type="button" role="tab" class="tabs-trigger is-active" aria-selected="true" tabindex="0" aria-controls="overview-tabs-panel-0" data-tiara-tabs-target="overview-tabs" data-tiara-tabs-index="0">Overview</button><button id="overview-tabs-tab-1" type="button" role="tab" class="tabs-trigger" aria-selected="false" tabindex="-1" aria-controls="overview-tabs-panel-1" data-tiara-tabs-target="overview-tabs" data-tiara-tabs-index="1">Usage</button><button id="overview-tabs-tab-2" type="button" role="tab" class="tabs-trigger" aria-selected="false" tabindex="-1" aria-controls="overview-tabs-panel-2" data-tiara-tabs-target="overview-tabs" data-tiara-tabs-index="2">Notes</button></div><div class="tabs-panels"><section id="overview-tabs-panel-0" role="tabpanel" class="tabs-panel is-active" aria-labelledby="overview-tabs-tab-0" data-tiara-tabs-panel="0" aria-hidden="false"><p>Tiara is designed for SSR-first Nim apps.</p></section><section id="overview-tabs-panel-1" role="tabpanel" class="tabs-panel" aria-labelledby="overview-tabs-tab-1" data-tiara-tabs-panel="1" hidden aria-hidden="true"><figure class="code-block" data-tiara="code-block"><figcaption class="code-block-header"><span class="code-block-language">NIM</span></figcaption><pre class="code-block-pre"><code class="code-block-code language-nim"><span class="code-token code-keyword">let</span> btn = Tiara.button(<span class="code-token code-string">&quot;Send&quot;</span>)</code></pre></figure></section><section id="overview-tabs-panel-2" role="tabpanel" class="tabs-panel" aria-labelledby="overview-tabs-tab-2" data-tiara-tabs-panel="2" hidden aria-hidden="true"><p>All components render accessible semantic HTML.</p></section></div></section></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Dropdown</h3><div class="card-content"><div id="account-menu" class="dropdown dropdown-medium" data-tiara="dropdown" data-tiara-dropdown-open="false" data-tiara-motion-ms="180"><button type="button" class="dropdown-toggle" aria-expanded="false" aria-controls="account-menu-menu" data-tiara-dropdown-toggle="account-menu">Account</button><ul id="account-menu-menu" class="dropdown-menu dropdown-menu-right" data-tiara-dropdown-menu="account-menu" hidden><li class="dropdown-item" data-tiara-dropdown-item="0"><span>Profile</span></li><li class="dropdown-item" data-tiara-dropdown-item="1"><span>Billing</span></li><li class="dropdown-item" data-tiara-dropdown-item="2"><span>Sign out</span></li></ul></div></div></section></section><section class="demo-section"><section class="card"><h3 class="card-title">Toasts</h3><div class="card-content"><div style="display: flex; gap: 0.5rem; flex-wrap: wrap;"><button class="btn btn-primary btn-medium" data-tiara-toast-trigger="toast-1">Show Success (Bottom Right)</button><button class="btn btn-secondary btn-medium" data-tiara-toast-trigger="toast-2">Show Warning (Top Right)</button><button class="btn btn-secondary btn-medium" data-tiara-toast-trigger="toast-3">Show Info (Top Center)</button><button class="btn btn-secondary btn-medium" data-tiara-toast-trigger="toast-4">Show Error (Bottom Left)</button></div></div></section></section><aside class="toast toast-success" role="status" data-tiara="toast" data-tiara-toast-position="bottom-right" id="toast-1" data-tiara-toast-autohide="3000"><div class="toast-content"><strong class="toast-title">Success</strong><span class="toast-message">Your request has been processed successfully.</span></div><button type="button" class="toast-close" aria-label="Dismiss notification" data-tiara-toast-close>x</button></aside><aside class="toast toast-warning" role="status" data-tiara="toast" data-tiara-toast-position="top-right" id="toast-2" data-tiara-toast-autohide="5000"><div class="toast-content"><strong class="toast-title">Warning</strong><span class="toast-message">Please check your network connection.</span></div><button type="button" class="toast-close" aria-label="Dismiss notification" data-tiara-toast-close>x</button></aside><aside class="toast toast-info" role="status" data-tiara="toast" data-tiara-toast-position="top-center" id="toast-3" data-tiara-toast-autohide="4000"><div class="toast-content"><strong class="toast-title">Update Available</strong><span class="toast-message">A new software update is available.</span></div><button type="button" class="toast-close" aria-label="Dismiss notification" data-tiara-toast-close>x</button></aside><aside class="toast toast-error" role="status" data-tiara="toast" data-tiara-toast-position="bottom-left" id="toast-4"><div class="toast-content"><strong class="toast-title">Error</strong><span class="toast-message">Failed to save the changes.</span></div><button type="button" class="toast-close" aria-label="Dismiss notification" data-tiara-toast-close>x</button></aside></div></main><script src="assets/tiara_client.js" defer></script>
+</body>
+</html>

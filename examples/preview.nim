@@ -67,7 +67,8 @@ proc renderPreviewPage*(
 
   let modalDemo = Tiara.modal(
     id = "preview-modal",
-    trigger = Tiara.button("Open Modal", color = "secondary"),
+    trigger = Tiara.button("Open Modal", color = "secondary", attrs = @[(
+        "data-tiara-modal-open", "preview-modal")]),
     content = Tiara.text("This modal is controlled by tiara_client.js"),
     title = "Tiara Modal"
   )
@@ -109,8 +110,8 @@ proc renderPreviewPage*(
       actions = joinHtml([
         Tiara.badge("Beta", tone = "accent", variant = "solid"),
         Tiara.button("Explore", size = "small")
-      ])
-    ),
+    ])
+  ),
     Tiara.sectionHeader(
       title = "Centered variation",
       description = "The same primitive can also anchor a centered marketing block.",
@@ -254,12 +255,12 @@ body {
 .stack { display: grid; gap: 0.875rem; }
 .showcase-row { align-items: center; display: flex; flex-wrap: wrap; gap: 0.9rem; }
 .showcase-grid { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.tabs, .dropdown, .toast, .carousel, .code-block { width: 100%; }
-.navbar, .hero, .section-header { width: 100%; }
+.tabs, .dropdown, .carousel, .code-block, .navbar, .hero, .section-header { width: 100%; }
+.toast { width: auto; }
 </style>
 """),
     el("main", Tiara.container(content), @[("class", "page-wrap")]),
-    Tiara.clientScriptTag(clientScriptSrc)
+    Tiara.clientScriptTag(clientScriptSrc & "?v=" & $687865) # Use a dummy version for now
   ])
 
   result = fmt"""<!doctype html>

@@ -22,8 +22,8 @@ proc toast*(
 
   var bodySegments: seq[Html] = @[]
   if title.strip().len > 0:
-    bodySegments.add(el("strong", textNode(title), @[("class", "toast-title")]))
-  bodySegments.add(el("span", textNode(message), @[("class", "toast-message")]))
+    bodySegments.add(el("h4", textNode(title), @[("class", "toast-title")]))
+  bodySegments.add(el("p", textNode(message), @[("class", "toast-message")]))
 
   var outerSegments: seq[Html] = @[
     el("div", joinHtml(bodySegments), @[("class", "toast-content")])

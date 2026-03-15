@@ -265,10 +265,18 @@ when defined(js):
         storage.appendChild(toast)
       elif not toast.parentNode.isNil:
         toast.parentNode.removeChild(toast)
-    , 300)
+
+      # Remove wrapper if empty
+      if not wrapper.isNil and wrapper.children.len == 0:
+        if not wrapper.parentNode.isNil:
+          wrapper.parentNode.removeChild(wrapper)
+    , 400)
 
   proc showToast*(toast: Element) =
-    if toast.isNil: return
+    asm """console.log('TIARA_CLIENT: showToast called for:', `toast`);"""
+    if toast.isNil:
+      asm """console.error('TIARA_CLIENT: showToast received nil toast');"""
+      return
 
     var position = toast.getAttribute("data-tiara-toast-position")
     if position.isNil or $position == "":
@@ -284,16 +292,23 @@ when defined(js):
 
     # If the toast is already somewhere else, remove it first
     if not toast.parentNode.isNil:
-      toast.parentNode.removeChild(toast)
+      toast.parentNode.parentNode.removeChild(
+          toast.parentNode) # Remove the wrapper if it's already there
+      # toast.parentNode.removeChild(toast) # This would remove the toast from its current wrapper
 
     wrapper.appendChild(toast)
 
-    # Read layout to force CSS transition
-    discard window.getComputedStyle(toast).opacity
+    # Hide initially if not already
+    toast.classList.remove("is-open")
+    toast.classList.remove("is-closing")
 
-    if toast.hasClassList():
-      toast.classList.remove("is-closing")
+    # Use a small delay to ensure the browser has rendered the initial state
+    # before we add the 'is-open' class to trigger the transition.
+    discard window.setTimeout(proc() =
       toast.classList.add("is-open")
+      # Force a re-style
+      discard window.getComputedStyle(toast).opacity
+    , 50)
 
     let hideAfterStr = toast.getAttribute("data-tiara-toast-autohide")
     var hideAfter = 0
@@ -308,12 +323,17 @@ when defined(js):
       , hideAfter)
 
   proc initTiaraClient*() =
-    if tiaraClientReady: return
+    asm """console.log('TIARA_CLIENT: Initializing...');"""
+    if tiaraClientReady:
+      asm """console.log('TIARA_CLIENT: Already initialized.');"""
+      return
     tiaraClientReady = true
 
     document.addEventListener("click", proc(event: Event) =
       let target = event.target
+      asm """console.log('TIARA_CLIENT: Click target:', `target`);"""
       if target.matches("dialog[data-tiara=\"modal\"]"):
+        asm """console.log('TIARA_CLIENT: Modal backdrop click');"""
         closeModal(target.Element)
         return
 
@@ -489,9 +509,14 @@ when defined(js):
         toastStorage.appendChild(toastNode)
 
   if document.toJs().readyState.to(cstring) == cstring("loading"):
+    asm """console.log('TIARA_CLIENT: Waiting for DOMContentLoaded...');"""
     document.addEventListener("DOMContentLoaded", proc(
-        event: Event) = initTiaraClient())
+        event: Event) =
+      asm """console.log('TIARA_CLIENT: DOMContentLoaded fired.');"""
+      initTiaraClient()
+    )
   else:
+    asm """console.log('TIARA_CLIENT: DOM already ready, initializing immediately.');"""
     initTiaraClient()
 
 else:
