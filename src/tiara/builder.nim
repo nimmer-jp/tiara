@@ -1,4 +1,4 @@
-import std/strutils
+import std/[strutils, tables]
 
 type
   Html* = distinct string
@@ -38,6 +38,38 @@ proc classList*(classes: openArray[string]): string =
     if result.len > 0:
       result.add ' '
     result.add cls
+
+proc getTailwindPrefix(cls: string): string =
+  var modifier = ""
+  var base = cls
+  let colonIdx = cls.rfind(':')
+  if colonIdx != -1:
+    modifier = cls[0..colonIdx]
+    base = cls[colonIdx+1..^1]
+  
+  let prefixes = ["bg-", "text-", "font-", "border-", "ring-", "cursor-",
+                  "p-", "pt-", "pr-", "pb-", "pl-", "px-", "py-",
+                  "m-", "mt-", "mr-", "mb-", "ml-", "mx-", "my-",
+                  "w-", "h-", "min-w-", "max-w-", "min-h-", "max-h-",
+                  "flex-", "grid-", "gap-", "rounded-", "shadow-", "z-", "opacity-"]
+  for prefix in prefixes:
+    if base.startsWith(prefix):
+      return modifier & prefix
+  return cls
+
+proc mergeClasses*(baseStr: string, overrideStr: string): string =
+  var classMap = initOrderedTable[string, string]()
+  for cls in baseStr.splitWhitespace():
+    if cls.len > 0:
+      classMap[getTailwindPrefix(cls)] = cls
+  for cls in overrideStr.splitWhitespace():
+    if cls.len > 0:
+      classMap[getTailwindPrefix(cls)] = cls
+  
+  var res: seq[string] = @[]
+  for val in classMap.values():
+    res.add(val)
+  return res.join(" ")
 
 proc attrsToString*(attrs: openArray[(string, string)]): string =
   for (rawName, rawValue) in attrs:

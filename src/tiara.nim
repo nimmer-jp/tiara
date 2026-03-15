@@ -1,3 +1,3 @@
-import tiara/[builder, components, client]
+import tiara/[core, builder, components, client]
 
-export builder, components, client
+export core, builder, components, client

@@ -440,6 +440,20 @@ when defined(js):
                 except ValueError: discard
         return
 
+      let tiaraOnClick = target.closest("[data-tiara-on-click]")
+      if not tiaraOnClick.isNil:
+        let fnName = tiaraOnClick.getAttribute("data-tiara-on-click")
+        if not fnName.isNil and $fnName != "":
+          asm """
+            var fn = window["TiaraApp_" + String(`fnName`)];
+            if (typeof fn === "function") {
+              fn(`event`);
+            } else {
+              console.warn("Tiara hydration: function TiaraApp_" + String(`fnName`) + " not found on window.");
+            }
+          """
+        return
+
       closeAllDropdowns(nil)
     )
 
@@ -465,7 +479,35 @@ when defined(js):
               $previewId & "']")
           if not swatch.isNil:
             swatch.style.backgroundColor = inputEl.toJs().value.to(cstring)
+            
+      let tiaraOnInput = inputEl.closest("[data-tiara-on-input]")
+      if not tiaraOnInput.isNil:
+        let fnName = tiaraOnInput.getAttribute("data-tiara-on-input")
+        if not fnName.isNil and $fnName != "":
+          asm """
+            var fn = window["TiaraApp_" + String(`fnName`)];
+            if (typeof fn === "function") {
+              fn(`event`);
+            }
+          """
     )
+    
+    for evName in ["change", "submit", "keydown", "keyup"]:
+      let evNameStr = evName
+      document.addEventListener(cstring(evNameStr), proc(event: Event) =
+        let target = event.target.Element
+        let attrSelector = cstring("[data-tiara-on-" & evNameStr & "]")
+        let tiaraOnNode = target.closest(attrSelector)
+        if not tiaraOnNode.isNil:
+          let fnName = tiaraOnNode.getAttribute(cstring("data-tiara-on-" & evNameStr))
+          if not fnName.isNil and $fnName != "":
+            asm """
+              var fn = window["TiaraApp_" + String(`fnName`)];
+              if (typeof fn === "function") {
+                fn(`event`);
+              }
+            """
+      )
 
     let carousels = document.querySelectorAll("[data-tiara=\"carousel\"]")
     for i in 0 ..< carousels.len:

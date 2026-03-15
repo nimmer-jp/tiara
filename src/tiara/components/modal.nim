@@ -1,6 +1,83 @@
-import ../builder
+import ../core
 import ./utils
 export utils
+
+when defined(js):
+  import std/dom
+
+  proc getMotionMs(node: Element, fallbackMs: int): int =
+    if node.isNil: return fallbackMs
+    let rawStr = node.getAttribute("data-tiara-motion-ms")
+    if rawStr.isNil or $rawStr == "": return fallbackMs
+    try:
+      let raw = parseInt($rawStr)
+      if raw > 0: return raw
+    except ValueError:
+      discard
+    return fallbackMs
+
+  proc requestAnimationFrame(cb: proc()) {.importc.}
+
+  proc tiaraModalOpen*(e: Event) {.client.} =
+    let opener = e.target.Element.closest("[data-tiara-modal-target]")
+    if not opener.isNil:
+      let dialogId = opener.getAttribute("data-tiara-modal-target")
+      if not dialogId.isNil:
+        let dialog = document.getElementById($dialogId)
+        if not dialog.isNil:
+          let motionMs = getMotionMs(dialog, 220)
+          dialog.style.setProperty("--tiara-motion-ms", cstring($motionMs & "ms"))
+          
+          let jsDialog = dialog.toJs()
+          if not isUndefined(jsDialog.tiaraCloseTimer) and not isNull(jsDialog.tiaraCloseTimer):
+            window.clearTimeout(jsDialog.tiaraCloseTimer.to(TimeOut))
+            jsDialog.tiaraCloseTimer = jsNull
+            
+          if jsTypeof(jsDialog.showModal) == cstring("function"):
+            jsDialog.showModal()
+            
+          if dialog.hasClassList():
+            dialog.classList.remove("is-closing")
+            dialog.classList.remove("is-opening")
+            
+          requestAnimationFrame(proc() =
+            if dialog.hasClassList():
+              dialog.classList.add("is-open")
+          )
+
+  proc doModalClose(dialog: Element) =
+    if dialog.isNil: return
+    let motionMs = getMotionMs(dialog, 220)
+    dialog.style.setProperty("--tiara-motion-ms", cstring($motionMs & "ms"))
+    
+    let jsDialog = dialog.toJs()
+    if not isUndefined(jsDialog.tiaraCloseTimer) and not isNull(jsDialog.tiaraCloseTimer):
+      window.clearTimeout(jsDialog.tiaraCloseTimer.to(TimeOut))
+      jsDialog.tiaraCloseTimer = jsNull
+      
+    if dialog.hasClassList():
+      dialog.classList.remove("is-open")
+      dialog.classList.add("is-closing")
+      
+    jsDialog.tiaraCloseTimer = window.setTimeout(proc() =
+      jsDialog.tiaraCloseTimer = jsNull
+      if dialog.hasClassList():
+        dialog.classList.remove("is-closing")
+      if jsTypeof(jsDialog.close) == cstring("function"):
+        jsDialog.close()
+    , motionMs)
+
+  proc tiaraModalClose*(e: Event) {.client.} =
+    let btn = e.target.Element.closest("[data-tiara-modal-close]")
+    if not btn.isNil:
+      let hostDialog = btn.closest("dialog")
+      if not hostDialog.isNil:
+        doModalClose(hostDialog)
+        
+  proc tiaraModalBackdropClick*(e: Event) {.client.} =
+    let target = e.target.Element
+    if target.matches("dialog[data-tiara=\"modal\"]"):
+      doModalClose(target)
 
 proc modal*(
   T: typedesc[Tiara],
@@ -24,35 +101,35 @@ proc modal*(
       normalizeDomId(size)
     else:
       "medium"
-  var dialogBody: seq[Html] = @[]
 
-  if title.len > 0:
-    dialogBody.add(el("h2", textNode(title), @[("class", "modal-title")]))
+  let titleHtml = if title.len > 0: html"""<h2 class="modal-title">{title}</h2>""" else: rawHtml("")
 
-  dialogBody.add(el("div", content, @[("class", "modal-content")]))
+  let closeButtonClass = "btn btn-secondary btn-small"
+  let closeButtonHtml = html"""<button type="button" class="{closeButtonClass}" data-tiara-modal-close tiara-on:click="tiaraModalClose">{closeLabel}</button>"""
 
-  let closeButton = Tiara.button(closeLabel, color = "secondary", size = "small", buttonType = "button", attrs = @[("data-tiara-modal-close", safeId)])
-  dialogBody.add(el("div", closeButton, @[("class", "modal-actions")]))
+  let baseClassStr = "modal modal-" & sizeClass
+  var classes = baseClassStr
+  for attr in attrs:
+    if attr[0] == "class":
+      classes = mergeClasses(baseClassStr, attr[1])
+      
+  var extraAttrs = ""
+  for attr in attrs:
+    if attr[0] != "class":
+      extraAttrs &= " " & attr[0] & "=\"" & escapeHtml(attr[1]) & "\""
 
-  let triggerWrapper = el(
-    "span",
-    trigger,
-    @[("class", "modal-trigger"), ("data-tiara-modal-open", safeId)]
-  )
+  let safeMotionMs = max(80, motionMs)
 
-  let dialogElement = el(
-    "dialog",
-    joinHtml(dialogBody),
-    mergeAttrs(
-      @[
-        ("id", safeId),
-        ("class", classList(["modal", "modal-" & sizeClass])),
-        ("data-tiara", "modal"),
-        ("data-tiara-motion-ms", $max(80, motionMs))
-      ],
-      attrs
-    )
-  )
-
-  joinHtml([triggerWrapper, dialogElement])
+  result = html"""
+<span class="modal-trigger" data-tiara-modal-target="{safeId}" tiara-on:click="tiaraModalOpen">{trigger}</span>
+<dialog id="{safeId}" class="{classes}" aria-modal="true" role="dialog" data-tiara="modal" data-tiara-motion-ms="{safeMotionMs}" tiara-on:click="tiaraModalBackdropClick"{extraAttrs}>
+  {titleHtml}
+  <div class="modal-content">
+    {content}
+  </div>
+  <div class="modal-actions">
+    {closeButtonHtml}
+  </div>
+</dialog>
+"""
 

@@ -1,6 +1,57 @@
-import ../builder
+import ../core
 import ./utils
 export utils
+
+when defined(js):
+  import std/dom
+
+  proc tiaraTabClick*(e: Event) {.client.} =
+    let trigger = e.target.Element.closest("[data-tiara-tabs-target]")
+    if not trigger.isNil:
+      let tabsId = trigger.getAttribute("data-tiara-tabs-target")
+      var tabs: Element = nil
+      if not tabsId.isNil and $tabsId != "":
+        tabs = document.getElementById($tabsId).Element
+      else:
+        let tNode = trigger.closest("[data-tiara=\"tabs\"]")
+        if not tNode.isNil: tabs = tNode.Element
+
+      if not tabs.isNil:
+        let tabIndexStr = trigger.getAttribute("data-tiara-tabs-index")
+        var nextIndex = 0
+        if not tabIndexStr.isNil and $tabIndexStr != "":
+          try: nextIndex = parseInt($tabIndexStr)
+          except ValueError: discard
+          
+        let triggers = tabs.querySelectorAll("[data-tiara-tabs-index]")
+        let panels = tabs.querySelectorAll("[data-tiara-tabs-panel]")
+        let size = min(triggers.len, panels.len)
+        if size <= 0: return
+
+        let boundedIndex = ((nextIndex mod size) + size) mod size
+        tabs.setAttribute("data-tiara-tabs-index", cstring($boundedIndex))
+
+        for i in 0 ..< size:
+          let isActive = i == boundedIndex
+          let tr = triggers[i]
+          let pa = panels[i]
+
+          tr.setAttribute("aria-selected", cstring(if isActive: "true" else: "false"))
+          tr.setAttribute("tabindex", cstring(if isActive: "0" else: "-1"))
+          if tr.hasClassList():
+            if isActive: tr.classList.add("is-active")
+            else: tr.classList.remove("is-active")
+
+          if isActive:
+            pa.removeAttribute("hidden")
+            pa.setAttribute("aria-hidden", cstring("false"))
+          else:
+            pa.setAttribute("hidden", cstring(""))
+            pa.setAttribute("aria-hidden", cstring("true"))
+
+          if pa.hasClassList():
+            if isActive: pa.classList.add("is-active")
+            else: pa.classList.remove("is-active")
 
 proc tabs*(
   T: typedesc[Tiara],
@@ -17,7 +68,7 @@ proc tabs*(
 
   var normalizedItems: seq[(string, Html)] = @[]
   if items.len == 0:
-    normalizedItems.add(("Tab 1", Tiara.text("No content")))
+    normalizedItems.add(("Tab 1", rawHtml("No content")))
   else:
     for item in items:
       normalizedItems.add(item)
@@ -25,62 +76,50 @@ proc tabs*(
   let lastIndex = normalizedItems.len - 1
   let selectedIndex = max(0, min(activeIndex, lastIndex))
 
-  var triggers: seq[Html] = @[]
-  var panels: seq[Html] = @[]
+  var triggersHtml = ""
+  var panelsHtml = ""
   for idx, entry in normalizedItems:
     let tabId = safeId & "-tab-" & $idx
     let panelId = safeId & "-panel-" & $idx
     let isActive = idx == selectedIndex
+    
+    let triggerClass = if isActive: "tabs-trigger is-active" else: "tabs-trigger"
+    let ariaSelected = if isActive: "true" else: "false"
+    let tabIndexAttr = if isActive: "0" else: "-1"
+    
+    triggersHtml &= $html"""
+<button id="{tabId}" type="button" role="tab" class="{triggerClass}" aria-selected="{ariaSelected}" tabindex="{tabIndexAttr}" aria-controls="{panelId}" data-tiara-tabs-target="{safeId}" data-tiara-tabs-index="{idx}" tiara-on:click="tiaraTabClick">{entry[0]}</button>
+    """
 
-    triggers.add(
-      el(
-        "button",
-        textNode(entry[0]),
-        @[
-          ("id", tabId),
-          ("type", "button"),
-          ("role", "tab"),
-          ("class", classList(["tabs-trigger", if isActive: "is-active" else: ""])),
-          ("aria-selected", if isActive: "true" else: "false"),
-          ("tabindex", if isActive: "0" else: "-1"),
-          ("aria-controls", panelId),
-          ("data-tiara-tabs-target", safeId),
-          ("data-tiara-tabs-index", $idx)
-        ]
-      )
-    )
+    let panelClass = if isActive: "tabs-panel is-active" else: "tabs-panel"
+    let panelHiddenAttr = if not isActive: "hidden" else: ""
+    let ariaHidden = if isActive: "false" else: "true"
+    
+    panelsHtml &= $html"""
+<section id="{panelId}" role="tabpanel" class="{panelClass}" aria-labelledby="{tabId}" data-tiara-tabs-panel="{idx}" {panelHiddenAttr} aria-hidden="{ariaHidden}">
+  {entry[1]}
+</section>
+    """
 
-    panels.add(
-      el(
-        "section",
-        entry[1],
-        @[
-          ("id", panelId),
-          ("role", "tabpanel"),
-          ("class", classList(["tabs-panel", if isActive: "is-active" else: ""])),
-          ("aria-labelledby", tabId),
-          ("data-tiara-tabs-panel", $idx),
-          (if isActive: ("aria-hidden", "false") else: ("hidden", "")),
-          (if isActive: ("", "") else: ("aria-hidden", "true"))
-        ]
-      )
-    )
+  let baseClassStr = "tabs"
+  var classes = baseClassStr
+  for attr in attrs:
+    if attr[0] == "class":
+      classes = mergeClasses(baseClassStr, attr[1])
+      
+  var extraAttrs = ""
+  for attr in attrs:
+    if attr[0] != "class":
+      extraAttrs &= " " & attr[0] & "=\"" & escapeHtml(attr[1]) & "\""
 
-  el(
-    "section",
-    joinHtml([
-      el("div", joinHtml(triggers), @[("class", "tabs-list"), ("role", "tablist")]),
-      el("div", joinHtml(panels), @[("class", "tabs-panels")])
-    ]),
-    mergeAttrs(
-      @[
-        ("id", safeId),
-        ("class", "tabs"),
-        ("data-tiara", "tabs"),
-        ("data-tiara-tabs-index", $selectedIndex),
-        ("data-tiara-tabs-size", $normalizedItems.len)
-      ],
-      attrs
-    )
-  )
+  result = html"""
+<section id="{safeId}" class="{classes}" data-tiara="tabs" data-tiara-tabs-index="{selectedIndex}" data-tiara-tabs-size="{normalizedItems.len}"{extraAttrs}>
+  <div class="tabs-list" role="tablist">
+    {rawHtml(triggersHtml)}
+  </div>
+  <div class="tabs-panels">
+    {rawHtml(panelsHtml)}
+  </div>
+</section>
+  """
 
