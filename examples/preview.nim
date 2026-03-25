@@ -13,7 +13,7 @@ proc catalogLabel(text: string): Html =
   Tiara.text(text, tag = "p", attrs = @[("class", "tiara-catalog-label")])
 
 proc catalogDemoWithTabs*(preview: Html, nimCode: string, id: string): Html =
-  ## カタログ用: ライブプレビューと Nim の実装例をタブで切り替え。
+  ## カタログ用: ライブプレビューと Crown 向け実装例（`html"""` + `{…}`）をタブで切り替え。
   Tiara.tabs(
     id = id,
     items = @[
@@ -285,166 +285,264 @@ proc renderPreviewPage*(
   ]), @[("id", "tiara-toast-storage"), ("style", "display:none")])
 
   let
-    codeNavbar = """
-import tiara/components
-
-Tiara.navbar(
-  brand = "👑 Tiara",
-  links = @[("Home", "/"), ("Docs", "/docs"), ("Components", "/components")],
-  action = Tiara.button("GitHub", color = "secondary", outlined = true)
-)
-""".strip()
-    codeHero = """
-import tiara/components
-
-Tiara.hero(
-  title = "Ship search-ready Nim websites.",
-  description = "Landing pages and docs hubs from Tiara primitives.",
-  kicker = "Marketing UI",
-  badges = @["SSR-first", "Docs Search"],
-  actions = @[
-    Tiara.button("Open Docs"),
-    Tiara.button("Try Search", color = "secondary", outlined = true)
-  ],
-  visual = Tiara.codeBlock("nimble install tiara", language = "sh",
-    title = "terminal", chrome = "terminal")
-)
-""".strip()
-    codeButtons = """
-import tiara/components
-
-joinHtml(@[
-  Tiara.button("Primary"),
-  Tiara.button("Secondary", color = "secondary"),
-  Tiara.button("Danger", color = "danger"),
-  Tiara.button("Ghost", color = "ghost"),
-  Tiara.button("Outline", outlined = true),
-  Tiara.button("Small", size = "small"),
-  Tiara.button("Large", size = "large")
-])
-""".strip()
-    codeBadges = """
-import tiara/components
-
-Tiara.badge("Accent", tone = "accent")
-Tiara.badge("Success", tone = "success", variant = "solid")
-Tiara.badge("Outline", tone = "warning", variant = "outline")
-""".strip()
-    codeSectionHeaders = """
-import tiara/components
-
-Tiara.sectionHeader(
-  title = "Documentation sections",
-  description = "Kick titles and actions across guides.",
-  kicker = "Section Header",
-  actions = Tiara.button("Explore", size = "small")
-)
-""".strip()
-    codeSearch = """
-import tiara/components
-
-Tiara.searchBox(
-  name = "docs-search",
-  label = "Documentation Search",
-  placeholder = "Search installation, toast..."
-)
-Tiara.searchBox(
-  name = "q",
-  placeholder = "Search components...",
-  variant = "outline",
-  size = "large"
-)
-""".strip()
-    codeForms = """
-import tiara/components
-
-joinHtml(@[
-  Tiara.input(name = "username", label = "Username", placeholder = "tiara-user"),
-  Tiara.datePicker(name = "birthdate", label = "Birthdate",
-    minDate = "1900-01-01", maxDate = "today"),
-  Tiara.colorPicker(name = "theme", label = "Theme Color", default = "#2563eb")
-])
-""".strip()
-    codeModal = """
-import tiara/components
-
-Tiara.modal(
-  id = "my-modal",
-  trigger = Tiara.button("Open Modal", color = "secondary"),
-  content = Tiara.text("Modal body"),
-  title = "Tiara Modal"
-)
-""".strip()
-    codeCodeBlock = """
-import tiara/components
-
-Tiara.codeBlock(
-  "proc hello(name: string): string =\n  let answer = 42\n  result = \"Hi, \" & name",
-  language = "nim",
-  title = "sample.nim"
-)
-""".strip()
-    codeCardVariants = """
-import tiara/components
-
-Tiara.card("Elevated", Tiara.text("Featured content."), variant = "elevated")
-Tiara.card("Outline", Tiara.text("Secondary block."), variant = "outline")
-Tiara.card("Subtle", Tiara.text("Dense lists."), variant = "subtle")
-""".strip()
-    codeIcons = """
-import tiara/components
-
-Tiara.iconWithBadge(Tiara.text("✉", tag = "span"), badge = "12", label = "Inbox")
-Tiara.notificationIcon(badge = "5")
-Tiara.profileIcon(name = "Jane Doe", status = "online", size = "medium")
-""".strip()
-    codeCarousel = """
-import tiara/components
-
-Tiara.carousel(
-  id = "feature-carousel",
-  items = @[
-    Tiara.card("Fast SSR", Tiara.text("Optimized HTML.")),
-    Tiara.card("Pure Nim", Tiara.text("No JS framework."))
-  ]
-)
-""".strip()
-    codeTabs = """
-import tiara/components
-
-Tiara.tabs(
-  id = "my-tabs",
-  items = @[
-    ("Overview", Tiara.text("First panel")),
-    ("Code", Tiara.codeBlock("let x = 1", language = "nim"))
-  ]
-)
-""".strip()
-    codeDropdown = """
-import tiara/components
-
-Tiara.dropdown(
-  id = "account-menu",
-  label = "Account",
-  align = "right",
-  items = @[
-    Tiara.text("Profile", tag = "span"),
-    Tiara.text("Sign out", tag = "span")
-  ]
-)
-""".strip()
-    codeToasts = """
-import tiara/components
-
-# Markup: Tiara.toast(..., id = "toast-1", ...)
-# Trigger from a button:
-Tiara.button("Notify", attrs = @[("data-tiara-toast-trigger", "toast-1")])
-""".strip()
+    codeNavbar = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let navbar = $Tiara.navbar(",
+      "    brand = \"👑 Tiara\",",
+      "    links = @[",
+      "      (\"Home\", \"/\"), (\"Docs\", \"/docs\"), (\"Components\", \"/components\")",
+      "    ],",
+      "    action = Tiara.button(\"GitHub\", color = \"secondary\", outlined = true)",
+      "  )",
+      "  return html\"\"\"",
+      "    <header class=\"site-header\">{navbar}</header>",
+      "  \"\"\""
+    ].join("\n")
+    codeHero = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let hero = $Tiara.hero(",
+      "    title = \"Ship search-ready Nim websites.\",",
+      "    description = \"Landing pages and docs hubs from Tiara primitives.\",",
+      "    kicker = \"Marketing UI\",",
+      "    badges = @[\"SSR-first\", \"Docs Search\"],",
+      "    actions = @[",
+      "      Tiara.button(\"Open Docs\"),",
+      "      Tiara.button(\"Try Search\", color = \"secondary\", outlined = true)",
+      "    ],",
+      "    visual = Tiara.codeBlock(\"nimble install tiara\", language = \"sh\",",
+      "      title = \"terminal\", chrome = \"terminal\")",
+      "  )",
+      "  return html\"\"\"",
+      "    <section class=\"hero-wrap\">{hero}</section>",
+      "  \"\"\""
+    ].join("\n")
+    codeButtons = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let buttons = $joinHtml(@[",
+      "    Tiara.button(\"Primary\"),",
+      "    Tiara.button(\"Secondary\", color = \"secondary\"),",
+      "    Tiara.button(\"Danger\", color = \"danger\"),",
+      "    Tiara.button(\"Ghost\", color = \"ghost\"),",
+      "    Tiara.button(\"Outline\", outlined = true),",
+      "    Tiara.button(\"Small\", size = \"small\"),",
+      "    Tiara.button(\"Large\", size = \"large\")",
+      "  ])",
+      "  return html\"\"\"",
+      "    <div class=\"showcase-row\">{buttons}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeBadges = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let badges = $joinHtml(@[",
+      "    Tiara.badge(\"Accent\", tone = \"accent\"),",
+      "    Tiara.badge(\"Success\", tone = \"success\", variant = \"solid\"),",
+      "    Tiara.badge(\"Outline\", tone = \"warning\", variant = \"outline\")",
+      "  ])",
+      "  return html\"\"\"",
+      "    <div class=\"badge-row\">{badges}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeSectionHeaders = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let head = $Tiara.sectionHeader(",
+      "    title = \"Documentation sections\",",
+      "    description = \"Kick titles and actions across guides.\",",
+      "    kicker = \"Section Header\",",
+      "    actions = Tiara.button(\"Explore\", size = \"small\")",
+      "  )",
+      "  return html\"\"\"",
+      "    <div class=\"section-head\">{head}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeSearch = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let search = $joinHtml(@[",
+      "    Tiara.searchBox(",
+      "      name = \"docs-search\",",
+      "      label = \"Documentation Search\",",
+      "      placeholder = \"Search installation, toast...\"",
+      "    ),",
+      "    Tiara.searchBox(",
+      "      name = \"q\",",
+      "      placeholder = \"Search components...\",",
+      "      variant = \"outline\",",
+      "      size = \"large\"",
+      "    )",
+      "  ])",
+      "  return html\"\"\"",
+      "    <div class=\"search-stack\">{search}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeForms = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let form = $joinHtml(@[",
+      "    Tiara.input(name = \"username\", label = \"Username\",",
+      "      placeholder = \"tiara-user\"),",
+      "    Tiara.datePicker(name = \"birthdate\", label = \"Birthdate\",",
+      "      minDate = \"1900-01-01\", maxDate = \"today\"),",
+      "    Tiara.colorPicker(name = \"theme\", label = \"Theme Color\",",
+      "      default = \"#2563eb\")",
+      "  ])",
+      "  return html\"\"\"",
+      "    <form class=\"stack\">{form}</form>",
+      "  \"\"\""
+    ].join("\n")
+    codeModal = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let modal = $Tiara.modal(",
+      "    id = \"my-modal\",",
+      "    trigger = Tiara.button(\"Open Modal\", color = \"secondary\"),",
+      "    content = Tiara.text(\"Modal body\"),",
+      "    title = \"Tiara Modal\"",
+      "  )",
+      "  return html\"\"\"",
+      "    <div class=\"modal-slot\">{modal}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeCodeBlock = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let sample = $Tiara.codeBlock(",
+      "    \"proc hello(name: string): string =\\n\" &",
+      "    \"  let answer = 42\\n\" &",
+      "    \"  result = \\\"Hi, \\\" & name\",",
+      "    language = \"nim\",",
+      "    title = \"sample.nim\"",
+      "  )",
+      "  return html\"\"\"",
+      "    <div class=\"code-block-slot\">{sample}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeCardVariants = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let cards = $joinHtml(@[",
+      "    Tiara.card(\"Elevated\", Tiara.text(\"Featured content.\"),",
+      "      variant = \"elevated\"),",
+      "    Tiara.card(\"Outline\", Tiara.text(\"Secondary block.\"),",
+      "      variant = \"outline\"),",
+      "    Tiara.card(\"Subtle\", Tiara.text(\"Dense lists.\"),",
+      "      variant = \"subtle\")",
+      "  ])",
+      "  return html\"\"\"",
+      "    <div class=\"showcase-grid\">{cards}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeIcons = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let icons = $joinHtml(@[",
+      "    Tiara.iconWithBadge(Tiara.text(\"✉\", tag = \"span\"),",
+      "      badge = \"12\", label = \"Inbox\"),",
+      "    Tiara.notificationIcon(badge = \"5\"),",
+      "    Tiara.profileIcon(name = \"Jane Doe\", status = \"online\",",
+      "      size = \"medium\")",
+      "  ])",
+      "  return html\"\"\"",
+      "    <div class=\"showcase-icons\">{icons}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeCarousel = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let carousel = $Tiara.carousel(",
+      "    id = \"feature-carousel\",",
+      "    items = @[",
+      "      Tiara.card(\"Fast SSR\", Tiara.text(\"Optimized HTML.\")),",
+      "      Tiara.card(\"Pure Nim\", Tiara.text(\"No JS framework.\"))",
+      "    ]",
+      "  )",
+      "  return html\"\"\"",
+      "    <div class=\"carousel-wrap\">{carousel}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeTabs = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let tabs = $Tiara.tabs(",
+      "    id = \"my-tabs\",",
+      "    items = @[",
+      "      (\"Overview\", Tiara.text(\"First panel\")),",
+      "      (\"Code\", Tiara.codeBlock(\"let x = 1\", language = \"nim\"))",
+      "    ]",
+      "  )",
+      "  return html\"\"\"",
+      "    <div class=\"tabs-wrap\">{tabs}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeDropdown = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let menu = $Tiara.dropdown(",
+      "    id = \"account-menu\",",
+      "    label = \"Account\",",
+      "    align = \"right\",",
+      "    items = @[",
+      "      Tiara.text(\"Profile\", tag = \"span\"),",
+      "      Tiara.text(\"Sign out\", tag = \"span\")",
+      "    ]",
+      "  )",
+      "  return html\"\"\"",
+      "    <div class=\"dropdown-slot\">{menu}</div>",
+      "  \"\"\""
+    ].join("\n")
+    codeToasts = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "# Toasts live in #tiara-toast-storage; trigger from the page:",
+      "proc page*(req: Request): string =",
+      "  let toastTrigger = $Tiara.button(",
+      "    \"Notify\",",
+      "    attrs = @[(\"data-tiara-toast-trigger\", \"toast-1\")]",
+      "  )",
+      "  return html\"\"\"",
+      "    <div class=\"toast-triggers\">{toastTrigger}</div>",
+      "  \"\"\""
+    ].join("\n")
 
   let content = joinHtml([
     Tiara.text("Tiara Component Catalog", tag = "h1", attrs = @[("class",
         "page-title")]),
-    Tiara.text("Explore the same components shipped in the current repository, with live previews and implementation-ready examples.",
+    Tiara.text(
+        "Explore the same components shipped in the current repository, with live previews. " &
+        "Code tabs follow Crown: import crown/core, render Tiara to string with $, then interpolate in html\"\"\" … {name} … \"\"\" (Basolato tmpli + Component + $(…) is optional).",
         tag = "p", attrs = @[("class", "page-description")]),
     catalogMeta,
 
