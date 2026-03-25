@@ -19,9 +19,9 @@ when defined(js):
   proc requestAnimationFrame(cb: proc()) {.importc.}
 
   proc tiaraModalOpen*(e: Event) {.client.} =
-    let opener = e.target.Element.closest("[data-tiara-modal-target]")
+    let opener = e.target.Element.closest("[data-tiara-modal-open]")
     if not opener.isNil:
-      let dialogId = opener.getAttribute("data-tiara-modal-target")
+      let dialogId = opener.getAttribute("data-tiara-modal-open")
       if not dialogId.isNil:
         let dialog = document.getElementById($dialogId)
         if not dialog.isNil:
@@ -105,7 +105,7 @@ proc modal*(
   let titleHtml = if title.len > 0: html"""<h2 class="modal-title">{title}</h2>""" else: rawHtml("")
 
   let closeButtonClass = "btn btn-secondary btn-small"
-  let closeButtonHtml = html"""<button type="button" class="{closeButtonClass}" data-tiara-modal-close tiara-on:click="tiaraModalClose">{closeLabel}</button>"""
+  let closeButtonHtml = html"""<button type="button" class="{closeButtonClass}" data-tiara-modal-close="{safeId}" tiara-on:click="tiaraModalClose">{closeLabel}</button>"""
 
   let baseClassStr = "modal modal-" & sizeClass
   var classes = baseClassStr
@@ -117,12 +117,13 @@ proc modal*(
   for attr in attrs:
     if attr[0] != "class":
       extraAttrs &= " " & attr[0] & "=\"" & escapeHtml(attr[1]) & "\""
+  let extraAttrsHtml = rawHtml(extraAttrs)
 
   let safeMotionMs = max(80, motionMs)
 
   result = html"""
-<span class="modal-trigger" data-tiara-modal-target="{safeId}" tiara-on:click="tiaraModalOpen">{trigger}</span>
-<dialog id="{safeId}" class="{classes}" aria-modal="true" role="dialog" data-tiara="modal" data-tiara-motion-ms="{safeMotionMs}" tiara-on:click="tiaraModalBackdropClick"{extraAttrs}>
+<span class="modal-trigger" data-tiara-modal-open="{safeId}" tiara-on:click="tiaraModalOpen">{trigger}</span>
+<dialog id="{safeId}" class="{classes}" aria-modal="true" role="dialog" data-tiara="modal" data-tiara-motion-ms="{safeMotionMs}" tiara-on:click="tiaraModalBackdropClick"{extraAttrsHtml}>
   {titleHtml}
   <div class="modal-content">
     {content}

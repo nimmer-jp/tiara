@@ -8,6 +8,7 @@ proc profileIcon*(
   imageUrl = "",
   size = "medium",
   status = "",
+  variant = "neutral",
   attrs: seq[(string, string)] = @[]
 ): Html =
   let initials = initialsFromName(name)
@@ -16,6 +17,12 @@ proc profileIcon*(
       "medium"
     else:
       normalizeDomId(size)
+  let variantClass =
+    case normalizeDomId(variant)
+    of "brand", "dark":
+      normalizeDomId(variant)
+    else:
+      "neutral"
 
   var segments: seq[Html] = @[]
   if imageUrl.strip().len > 0:
@@ -49,7 +56,11 @@ proc profileIcon*(
     joinHtml(segments),
     mergeAttrs(
       @[
-        ("class", classList(["profile-icon", "profile-icon-" & sizeClass])),
+        ("class", classList([
+          "profile-icon",
+          "profile-icon-" & sizeClass,
+          "profile-icon-" & variantClass
+        ])),
         ("data-tiara", "profile-icon"),
         ("title", name)
       ],

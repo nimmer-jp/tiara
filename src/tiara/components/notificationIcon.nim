@@ -7,8 +7,16 @@ proc notificationIcon*(
   badge: string,
   icon = "🔔",
   label = "Notifications",
+  variant = "default",
   attrs: seq[(string, string)] = @[]
 ): Html =
+  let variantClass =
+    case normalizeDomId(variant)
+    of "subtle", "ghost", "solid":
+      normalizeDomId(variant)
+    else:
+      "default"
+
   var segments: seq[Html] = @[
     el("span", textNode(icon), @[("class", "icon-badge-icon"), ("aria-hidden", "true")])
   ]
@@ -21,7 +29,11 @@ proc notificationIcon*(
     mergeAttrs(
       @[
         ("type", "button"),
-        ("class", "icon-badge notification-icon"),
+        ("class", classList([
+          "icon-badge",
+          "notification-icon",
+          "notification-icon-" & variantClass
+        ])),
         ("data-tiara", "notification-icon"),
         ("aria-label", label)
       ],

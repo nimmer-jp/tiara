@@ -69,6 +69,10 @@ suite "Tiara components":
     let html = $Tiara.button("送信する", color = "primary", size = "large", outlined = true)
     check html == "<button class=\"btn btn-primary btn-large btn-outline\">送信する</button>"
 
+  test "button supports danger and ghost roles":
+    check ($Tiara.button("Delete", color = "danger")).contains("btn-danger")
+    check ($Tiara.button("More", color = "ghost")).contains("btn-ghost")
+
   test "card wraps title and content":
     let html = $Tiara.card(
       title = "ユーザー情報",
@@ -85,6 +89,10 @@ suite "Tiara components":
       variant = "glass"
     )
     check html.contains("class=\"card card-glass\"")
+
+  test "card supports subtle and flat surfaces":
+    check ($Tiara.card("S", Tiara.text("x"), variant = "subtle")).contains("card-subtle")
+    check ($Tiara.card("F", Tiara.text("x"), variant = "flat")).contains("card-flat")
 
   test "date picker resolves today token":
     let html = $Tiara.datePicker(
@@ -114,7 +122,7 @@ suite "Tiara components":
       content = Tiara.text("本当に削除しますか？")
     )
     check html.contains("data-tiara-modal-open=\"confirm-modal\"")
-    check html.contains("<dialog id=\"confirm-modal\" class=\"modal modal-medium\" data-tiara=\"modal\"")
+    check html.contains("<dialog id=\"confirm-modal\" class=\"modal modal-medium\" aria-modal=\"true\" role=\"dialog\" data-tiara=\"modal\"")
     check html.contains("data-tiara-motion-ms=\"220\"")
     check html.contains("data-tiara-modal-close=\"confirm-modal\"")
 
@@ -140,10 +148,15 @@ suite "Tiara components":
     check html.contains("code-block-traffic")
     check html.contains("code-block-dot-red")
 
+  test "badge supports error and info tones":
+    check ($Tiara.badge("E", tone = "error")).contains("badge-error")
+    check ($Tiara.badge("I", tone = "info", variant = "solid")).contains("badge-info")
+
   test "notification icon renders badge":
     let html = $Tiara.notificationIcon(badge = "7")
     check html.contains("data-tiara=\"notification-icon\"")
-    check html.contains("class=\"icon-badge notification-icon\"")
+    check html.contains("notification-icon-default")
+    check html.contains("icon-badge")
     check html.contains("<span class=\"icon-badge-count\">7</span>")
 
   test "carousel renders controls and slides":
@@ -160,10 +173,18 @@ suite "Tiara components":
     check html.contains("data-tiara-carousel-action=\"next\"")
     check html.contains("data-tiara-carousel-indicator=\"1\"")
 
+  test "notification icon supports style variants":
+    check ($Tiara.notificationIcon(badge = "1", variant = "solid")).contains("notification-icon-solid")
+    check ($Tiara.notificationIcon(badge = "", variant = "ghost")).contains("notification-icon-ghost")
+
+  test "profile icon supports style variants":
+    check ($Tiara.profileIcon(name = "X", variant = "brand")).contains("profile-icon-brand")
+
   test "profile icon supports initials and status":
     let html = $Tiara.profileIcon(name = "Jane Doe", status = "online", size = "large")
     check html.contains("data-tiara=\"profile-icon\"")
-    check html.contains("class=\"profile-icon profile-icon-large\"")
+    check html.contains("profile-icon-large")
+    check html.contains("profile-icon-neutral")
     check html.contains(">JD<")
     check html.contains("profile-icon-status-online")
 
@@ -257,6 +278,6 @@ suite "Tiara components":
   test "default styles keep center dropdown alignment with motion":
     let css = $Tiara.defaultStyles()
     check css.contains(".dropdown-menu { --tiara-dropdown-x: 0;")
-    check css.contains(".dropdown-menu-center { left: 50%; --tiara-dropdown-x: -50%; }")
+    check css.contains(".dropdown-menu-center { left: 50%; right: auto; --tiara-dropdown-x: -50%; transform-origin: top center; }")
     check css.contains(".navbar-glass {")
     check css.contains(".hero-split { grid-template-columns:")

@@ -38,6 +38,20 @@ when defined(js):
       return res.to(Element)
     return nil
 
+  proc parentElement*(node: Node): Element {.importcpp: "#.parentElement".}
+
+  proc eventTargetElement*(ev: Event): Element =
+    ## Clicks on text inside a ``<button>`` / ``<span>`` yield a Text node; those
+    ## nodes have no ``closest``, so dropdown toggles and other handlers must use
+    ## the nearest Element ancestor.
+    let n = cast[Node](ev.target)
+    if n.nodeType == ELEMENT_NODE:
+      return cast[Element](n)
+    let pe = n.parentElement
+    if pe.isNil:
+      return nil
+    return pe
+
   proc setProperty*(style: Style, prop: cstring, val: cstring) =
     style.toJs().setProperty(prop, val)
 
@@ -273,9 +287,7 @@ when defined(js):
     , 400)
 
   proc showToast*(toast: Element) =
-    asm """console.log('TIARA_CLIENT: showToast called for:', `toast`);"""
     if toast.isNil:
-      asm """console.error('TIARA_CLIENT: showToast received nil toast');"""
       return
 
     var position = toast.getAttribute("data-tiara-toast-position")
@@ -290,13 +302,16 @@ when defined(js):
       wrapper.setAttribute("class", "toast-wrapper " & wrapperClass)
       document.body.appendChild(wrapper)
 
-    # If the toast is already somewhere else, remove it first
+    var oldParent: Element = nil
     if not toast.parentNode.isNil:
-      toast.parentNode.parentNode.removeChild(
-          toast.parentNode) # Remove the wrapper if it's already there
-      # toast.parentNode.removeChild(toast) # This would remove the toast from its current wrapper
+      oldParent = toast.parentNode.Element
 
     wrapper.appendChild(toast)
+
+    if not oldParent.isNil:
+      if oldParent.matches(".toast-wrapper") and oldParent.children.len == 0:
+        if not oldParent.parentNode.isNil:
+          oldParent.parentNode.removeChild(oldParent)
 
     # Hide initially if not already
     toast.classList.remove("is-open")
@@ -330,8 +345,9 @@ when defined(js):
     tiaraClientReady = true
 
     document.addEventListener("click", proc(event: Event) =
-      let target = event.target
-      asm """console.log('TIARA_CLIENT: Click target:', `target`);"""
+      let target = eventTargetElement(event)
+      if target.isNil:
+        return
       if target.matches("dialog[data-tiara=\"modal\"]"):
         asm """console.log('TIARA_CLIENT: Modal backdrop click');"""
         closeModal(target.Element)
