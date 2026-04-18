@@ -281,3 +281,77 @@ suite "Tiara components":
     check css.contains(".dropdown-menu-center { left: 50%; right: auto; --tiara-dropdown-x: -50%; transform-origin: top center; }")
     check css.contains(".navbar-glass {")
     check css.contains(".hero-split { grid-template-columns:")
+
+  test "input merges attrs without duplicate id":
+    let html = $Tiara.input(
+      "email",
+      attrs = @[("id", "login-email"), ("class", "is-wide")]
+    )
+    check html.count("id=\"") == 1
+    check html.contains("id=\"login-email\"")
+    check html.contains("class=\"input is-wide\"")
+
+  test "textarea renders rows and data marker":
+    let html = $Tiara.textarea(
+      "body",
+      label = "本文",
+      placeholder = "入力",
+      rows = 6,
+      required = true
+    )
+    check html.contains("data-tiara=\"textarea\"")
+    check html.contains("rows=\"6\"")
+    check html.contains("<textarea")
+    check html.contains("required")
+    check html.contains("for=\"tiara-body\"")
+
+  test "textarea attrs override id once":
+    let html = $Tiara.textarea("x", attrs = @[("id", "custom-id")])
+    check html.count("id=\"") == 1
+    check html.contains("id=\"custom-id\"")
+
+  test "chat composer nests textarea and submit":
+    let html = $Tiara.chatComposer("msg", placeholder = "メッセージ", submitLabel = "送る")
+    check html.contains("data-tiara=\"chat-composer\"")
+    check html.contains("data-tiara=\"textarea\"")
+    check html.contains("type=\"submit\"")
+    check html.contains("送る")
+
+  test "chat bubble marks role":
+    let html = $Tiara.chatBubble("Hi", role = "user")
+    check html.contains("data-tiara=\"chat-bubble\"")
+    check html.contains("chat-bubble-user")
+
+  test "app shell wraps sidebar and main":
+    let html = $Tiara.appShell(
+      Tiara.text("nav"),
+      Tiara.text("content")
+    )
+    check html.contains("data-tiara=\"app-shell\"")
+    check html.contains("app-shell-sidebar")
+    check html.contains("app-shell-main")
+
+  test "alert banner uses tone class":
+    let html = $Tiara.alertBanner("詳細", title = "注意", tone = "warning")
+    check html.contains("data-tiara=\"alert-banner\"")
+    check html.contains("alert-banner-warning")
+
+  test "setup card shows optional badge":
+    let html = $Tiara.setupCard(
+      "APIキー",
+      Tiara.text("説明"),
+      step = "1/3",
+      optional = true
+    )
+    check html.contains("data-tiara=\"setup-card\"")
+    check html.contains("スキップ可")
+
+  test "field validation maps kinds":
+    check ($Tiara.fieldValidation("必須です", kind = "error")).contains("field-validation-error")
+    check ($Tiara.fieldValidation("ヒント", kind = "hint")).contains("field-validation-hint")
+
+  test "default styles include app shell and textarea":
+    let css = $Tiara.defaultStyles()
+    check css.contains(".app-shell {")
+    check css.contains(".textarea:focus")
+    check css.contains(".chat-composer")

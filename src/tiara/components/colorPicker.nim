@@ -20,8 +20,6 @@ proc colorPicker*(
     ("data-tiara-color-input", inputId)
   ]
 
-  inputAttrs.add(attrs)
-
   let preview = el(
     "span",
     rawHtml(""),
@@ -32,7 +30,7 @@ proc colorPicker*(
     ]
   )
 
-  let inputElement = voidEl("input", inputAttrs)
+  let inputElement = voidEl("input", mergeAttrs(inputAttrs, attrs))
   var body = joinHtml([inputElement, preview])
 
   if label.len > 0:

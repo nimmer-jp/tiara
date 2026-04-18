@@ -37,7 +37,7 @@ proc searchBox*(
   if value.len > 0:
     normalizedInputAttrs.add(("value", value))
 
-  normalizedInputAttrs.add(inputAttrs)
+  normalizedInputAttrs = mergeAttrs(normalizedInputAttrs, inputAttrs)
 
   let control = el(
     "div",

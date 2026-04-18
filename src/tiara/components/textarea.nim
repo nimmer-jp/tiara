@@ -2,41 +2,46 @@ import ../builder
 import ./utils
 export utils
 
-proc input*(
+proc textarea*(
   T: typedesc[Tiara],
   name: string,
   label = "",
   value = "",
-  inputType = "text",
   placeholder = "",
   required = false,
+  rows = 4,
   attrs: seq[(string, string)] = @[]
 ): Html =
   let inputId = "tiara-" & normalizeDomId(name)
-  var inputAttrs = @[
+  var baseAttrs = @[
     ("id", inputId),
     ("name", name),
-    ("type", inputType),
-    ("class", "input")
+    ("class", "textarea"),
+    ("rows", $rows),
+    ("data-tiara", "textarea")
   ]
 
-  if value.len > 0:
-    inputAttrs.add(("value", value))
   if placeholder.len > 0:
-    inputAttrs.add(("placeholder", placeholder))
+    baseAttrs.add(("placeholder", placeholder))
   if required:
-    inputAttrs.add(("required", ""))
+    baseAttrs.add(("required", ""))
 
-  let inputElement = voidEl("input", mergeAttrs(inputAttrs, attrs))
+  let mergedAttrs = mergeAttrs(baseAttrs, attrs)
+  let inner =
+    if value.len > 0:
+      textNode(value)
+    else:
+      rawHtml("")
+
+  let areaEl = el("textarea", inner, mergedAttrs)
   if label.len == 0:
-    return inputElement
+    return areaEl
 
   el(
     "div",
     joinHtml([
       el("label", textNode(label), @[("for", inputId), ("class", "field-label")]),
-      inputElement
+      areaEl
     ]),
     @[("class", "field")]
   )
-

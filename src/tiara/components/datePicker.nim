@@ -31,9 +31,7 @@ proc datePicker*(
   if resolvedValue.len > 0:
     inputAttrs.add(("value", resolvedValue))
 
-  inputAttrs.add(attrs)
-
-  let inputElement = voidEl("input", inputAttrs)
+  let inputElement = voidEl("input", mergeAttrs(inputAttrs, attrs))
   if label.len == 0:
     return inputElement
 

@@ -89,6 +89,12 @@ proc renderPreviewPage*(
   let formDemo = joinHtml([
     Tiara.input(name = "username", label = "Username",
         placeholder = "tiara-user"),
+    Tiara.textarea(
+      name = "bio",
+      label = "Bio",
+      placeholder = "Short introduction…",
+      rows = 4
+    ),
     Tiara.datePicker(name = "birthdate", label = "Birthdate",
         minDate = "1900-01-01", maxDate = "today"),
     Tiara.colorPicker(name = "theme", label = "Theme Color",
@@ -168,8 +174,63 @@ proc renderPreviewPage*(
     ]), @[("class", "tiara-catalog-row")])
   ])
 
+  let chatAppDemo = el(
+    "div",
+    Tiara.appShell(
+      Tiara.chatSidebar(
+        header = Tiara.text("会話", tag = "h2", attrs = @[("class", "demo-chat-sidebar-title")]),
+        body = joinHtml(@[
+          Tiara.chatSessionItem("プロジェクト A", meta = "昨日", active = true),
+          Tiara.chatSessionItem("サポート", meta = "先週"),
+          Tiara.chatSessionItem("デモ用スレッド", meta = "2026-04-01"),
+        ])
+      ),
+      el(
+        "div",
+        joinHtml(@[
+          el(
+            "div",
+            joinHtml(@[
+              Tiara.chatBubble("こんにちは。何かお手伝いできますか？", role = "assistant"),
+              Tiara.chatBubble("API キーを設定したいです", role = "user"),
+              Tiara.chatBubble("この画面はプレビューです", role = "system"),
+            ]),
+            @[("class", "demo-chat-transcript")]
+          ),
+          Tiara.chatComposer(
+            "message",
+            placeholder = "メッセージを入力…",
+            submitLabel = "送信"
+          ),
+        ]),
+        @[("class", "demo-chat-main")]
+      )
+    ),
+    @[("class", "demo-app-shell-wrap")]
+  )
+
+  let setupUiDemo = joinHtml(@[
+    Tiara.alertBanner(
+      "初回のみ API を登録してください。",
+      title = "セットアップ",
+      tone = "info"
+    ),
+    Tiara.setupCard(
+      "API キー",
+      joinHtml(@[
+        Tiara.input("api_key", label = "Secret", placeholder = "sk-…",
+            attrs = @[("autocomplete", "off")]),
+        Tiara.fieldValidation("このフィールドは必須です。", kind = "error"),
+        Tiara.fieldValidation("スキップした場合は後から設定できます。", kind = "hint"),
+      ]),
+      step = "1/3",
+      optional = true
+    ),
+    Tiara.alertBanner("ネットワークに接続できません。", tone = "warning"),
+  ])
+
   let catalogMeta = el("div", joinHtml([
-    Tiara.badge("15 component groups", tone = "accent", variant = "solid"),
+    Tiara.badge("17 component groups", tone = "accent", variant = "solid"),
     Tiara.badge("Interactive demos", tone = "success"),
     Tiara.badge("SSR-first", tone = "warning", variant = "outline")
   ]), @[("class", "showcase-row")])
@@ -399,6 +460,7 @@ proc renderPreviewPage*(
       "  let form = $joinHtml(@[",
       "    Tiara.input(name = \"username\", label = \"Username\",",
       "      placeholder = \"tiara-user\"),",
+      "    Tiara.textarea(name = \"bio\", label = \"Bio\", rows = 4),",
       "    Tiara.datePicker(name = \"birthdate\", label = \"Birthdate\",",
       "      minDate = \"1900-01-01\", maxDate = \"today\"),",
       "    Tiara.colorPicker(name = \"theme\", label = \"Theme Color\",",
@@ -407,6 +469,35 @@ proc renderPreviewPage*(
       "  return html\"\"\"",
       "    <form class=\"stack\">{form}</form>",
       "  \"\"\""
+    ].join("\n")
+    codeChatApp = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let layout = $Tiara.appShell(",
+      "    Tiara.chatSidebar(",
+      "      body = Tiara.chatSessionItem(\"Thread\", meta = \"Today\", active = true)",
+      "    ),",
+      "    joinHtml(@[",
+      "      Tiara.chatBubble(\"Hello\", role = \"assistant\"),",
+      "      Tiara.chatComposer(\"message\", placeholder = \"Type…\")",
+      "    ])",
+      "  )",
+      "  return html\"\"\"<div class=\"app\">{layout}</div>\"\"\""
+    ].join("\n")
+    codeSetupUi = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page*(req: Request): string =",
+      "  let panel = $joinHtml(@[",
+      "    Tiara.alertBanner(\"Read this first.\", title = \"Setup\", tone = \"info\"),",
+      "    Tiara.setupCard(\"API key\", Tiara.input(\"k\", label = \"Key\"),",
+      "      step = \"1/3\", optional = true),",
+      "    Tiara.fieldValidation(\"Invalid format\", kind = \"error\")",
+      "  ])",
+      "  return html\"\"\"<div class=\"stack\">{panel}</div>\"\"\""
     ].join("\n")
     codeModal = @[
       "import crown/core",
@@ -541,7 +632,7 @@ proc renderPreviewPage*(
     Tiara.text("Tiara Component Catalog", tag = "h1", attrs = @[("class",
         "page-title")]),
     Tiara.text(
-        "Explore the same components shipped in the current repository, with live previews. " &
+        "Explore the same components shipped in the current repository, with live previews (forms, app shell, chat, setup banners). " &
         "Code tabs follow Crown: import crown/core, render Tiara to string with $, then interpolate in html\"\"\" … {name} … \"\"\" (Basolato tmpli + Component + $(…) is optional).",
         tag = "p", attrs = @[("class", "page-description")]),
     catalogMeta,
@@ -563,6 +654,14 @@ proc renderPreviewPage*(
     demoSection("Forms", catalogDemoWithTabs(
       el("div", formDemo, @[("class", "stack")]),
       codeForms, "catalog-tabs-forms")),
+    demoSection("App shell & Chat", catalogDemoWithTabs(
+      chatAppDemo,
+      codeChatApp,
+      "catalog-tabs-chat-app")),
+    demoSection("Setup & validation", catalogDemoWithTabs(
+      el("div", setupUiDemo, @[("class", "stack"), ("style", "max-width: 40rem;")]),
+      codeSetupUi,
+      "catalog-tabs-setup-ui")),
     demoSection("Modal", catalogDemoWithTabs(modalDemo, codeModal,
         "catalog-tabs-modal")),
     demoSection("Code Block", catalogDemoWithTabs(codeDemo, codeCodeBlock,
@@ -633,6 +732,11 @@ body {
 .catalog-demo-tabs .tabs-list { flex-wrap: wrap; }
 .catalog-demo-tabs .tabs-panels { min-width: 0; padding-top: 0.65rem; }
 .catalog-demo-tabs .code-block-pre { max-height: 22rem; overflow: auto; }
+.demo-app-shell-wrap { border-radius: var(--tiara-radius-lg); max-width: 100%; overflow: hidden; }
+.demo-app-shell-wrap .app-shell { border: 1px solid var(--tiara-border); min-height: 22rem; }
+.demo-chat-sidebar-title { font-size: 1rem; font-weight: 700; margin: 0; }
+.demo-chat-main { display: flex; flex: 1; flex-direction: column; gap: 0.5rem; min-height: 0; padding: 0.75rem 1rem; }
+.demo-chat-transcript { display: flex; flex: 1; flex-direction: column; gap: 0.35rem; min-height: 10rem; overflow-y: auto; }
 </style>
 """),
     el("main", Tiara.container(content), @[("class", "page-wrap")]),
