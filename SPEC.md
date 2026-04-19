@@ -14,6 +14,9 @@ Basolatoなどのサーバーサイドレンダリング（SSR）フレームワ
 4. **Basolato First**
    Basolatoのコントローラーやビューにそのまま組み込める関数型/DSLアプローチを採用しています。
 
+5. **Crown との役割分担**
+   ページ全体のテンプレートやレイアウトは Crown／アプリ側、再利用 UI 断片と `Html` ビルダーは Tiara が担うのが基本です。統合パターンと `html` マクロ衝突の回避は `docs/crown-integration.md`、upstream 向けの改善トラッキングは `docs/improvement-plan-index.md` を参照してください。
+
 ## 🏛️ アーキテクチャと動作原理
 
 Tiaraのコンポーネントは、以下の2つの側面を持っています。

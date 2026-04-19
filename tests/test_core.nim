@@ -26,5 +26,10 @@ suite "Tiara core macro":
     let res = html"""<style>.foo \{ color: red; \}</style>"""
     check $res == "<style>.foo { color: red; }</style>"
 
+  test "tiaraHtml macro matches html (Crown collision escape hatch)":
+    let name = "Tiara"
+    let res = tiaraHtml"""<div>{name}</div>"""
+    check $res == "<div>Tiara</div>"
+
 proc testClientProc(e: string) {.client.} =
   echo "clicked ", e

@@ -633,7 +633,7 @@ proc renderPreviewPage*(
         "page-title")]),
     Tiara.text(
         "Explore the same components shipped in the current repository, with live previews (forms, app shell, chat, setup banners). " &
-        "Code tabs follow Crown: import crown/core, render Tiara to string with $, then interpolate in html\"\"\" … {name} … \"\"\" (Basolato tmpli + Component + $(…) is optional).",
+        "Code tabs follow Crown: import crown/core, render Tiara to string with $, then interpolate in html\"\"\" … {name} … \"\"\". If you also import tiara/core, use except html and tiaraHtml\"\"\" to avoid clashing with Crown's html macro (see docs/crown-integration.md). Basolato tmpli + Component + $(…) is optional.",
         tag = "p", attrs = @[("class", "page-description")]),
     catalogMeta,
 

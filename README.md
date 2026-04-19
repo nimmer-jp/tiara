@@ -27,7 +27,7 @@ Install via Nimble:
 nimble install tiara
 ```
 
-_Note: The `website`, `tests`, `docs`, and `examples` directories are excluded from the library payload to keep your installation incredibly fast and lightweight._
+_Note: The `website` and `examples` directories are excluded from the Nimble package; `tests` is skipped. Markdown guides under `docs/` are included so Crown integration notes ship with the library._
 
 ## 🚀 Quick Start
 
@@ -48,6 +48,10 @@ echo myToast
 ## 📚 Documentation
 
 For complete documentation, guides, and interactive examples, please visit the [Tiara Official Website](./website) (or refer to the `docs/` folder).
+
+### Crown + Basolato
+
+If you use Tiara with [Crown](https://github.com/nimmer-jp/crown) for page templates, read **[docs/crown-integration.md](./docs/crown-integration.md)** for import patterns and the **`tiaraHtml`** macro (avoids a name clash with Crown’s `html`). Upstream improvement tracking: [docs/improvement-plan-index.md](./docs/improvement-plan-index.md).
 
 ## 🤝 Contributing
 
