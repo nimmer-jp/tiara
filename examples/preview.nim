@@ -28,11 +28,12 @@ proc catalogDemoWithTabs*(preview: Html, nimCode: string, id: string): Html =
     attrs = @[("class", "catalog-demo-tabs")]
   )
 
-proc renderPreviewPage*(
-  clientScriptSrc = "assets/tiara_client.js",
-  homeHref = "#",
-  docsHref = "#",
-  componentsHref = "#"
+proc renderCatalogDocument*(
+  title: string;
+  clientScriptSrc = "/tiara_client",
+  homeHref = "/",
+  docsHref = "/docs",
+  componentsHref = "/components"
 ): string =
   proc navLink(href, label: string; active: bool): Html =
     let bg =
@@ -1045,13 +1046,27 @@ body {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tiara Lab — Component Playground</title>
+  <title>{title}</title>
 </head>
 <body>
 {body}
 </body>
 </html>
 """
+
+proc renderPreviewPage*(
+  clientScriptSrc = "assets/tiara_client.js",
+  homeHref = "#",
+  docsHref = "#",
+  componentsHref = "#"
+): string =
+  renderCatalogDocument(
+    "Tiara Lab — Component Playground",
+    clientScriptSrc,
+    homeHref,
+    docsHref,
+    componentsHref,
+  )
 
 when isMainModule:
   import std/os
