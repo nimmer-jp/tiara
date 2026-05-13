@@ -10,16 +10,26 @@ proc textarea*(
   placeholder = "",
   required = false,
   rows = 4,
+  variant = "default",
   attrs: seq[(string, string)] = @[]
 ): Html =
   let inputId = "tiara-" & normalizeDomId(name)
+  let editorLike = variant.normalizeLanguage() == "editor"
+  let areaClass =
+    if editorLike:
+      classList(@["textarea", "textarea-editor"])
+    else:
+      "textarea"
   var baseAttrs = @[
     ("id", inputId),
     ("name", name),
-    ("class", "textarea"),
+    ("class", areaClass),
     ("rows", $rows),
     ("data-tiara", "textarea")
   ]
+
+  if editorLike:
+    baseAttrs.add(("spellcheck", "false"))
 
   if placeholder.len > 0:
     baseAttrs.add(("placeholder", placeholder))

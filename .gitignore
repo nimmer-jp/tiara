@@ -8,3 +8,9 @@ website/.nimcache-run/
 /example
 /examples/preview
 website/.nimcache/
+
+.midnote/
+
+# midnote tracked markdown
+SPEC.md
+# end midnote tracked markdown

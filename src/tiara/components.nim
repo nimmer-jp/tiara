@@ -59,3 +59,25 @@ import ./components/clientScriptTag
 export clientScriptTag
 import ./components/defaultStyles
 export defaultStyles
+import ./components/segmentedControl
+export segmentedControl
+import ./components/toolStrip
+export toolStrip
+import ./components/dashboardShell
+export dashboardShell
+import ./components/workspaceShell
+export workspaceShell, workspaceDrawerToggle
+import ./components/consentBanner
+export consentBanner
+import ./components/authCard
+export authCard, authScreen
+import ./components/pageHeading
+export pageHeading
+import ./components/sidebarPanel
+export sidebarPanel
+import ./components/editorSplit
+export editorSplit
+import ./components/previewPanel
+export previewPanel
+import ./components/docEditorSurface
+export docEditorSurface

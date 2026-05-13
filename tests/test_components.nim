@@ -291,6 +291,35 @@ suite "Tiara components":
     check html.contains("id=\"login-email\"")
     check html.contains("class=\"input is-wide\"")
 
+  test "textarea editor variant uses monospace class":
+    let html = $Tiara.textarea("src", variant = "editor", rows = 12)
+    check html.contains("textarea-editor")
+    check html.contains("spellcheck=\"false\"")
+
+  test "editor split renders panes":
+    let html = $Tiara.editorSplit(Tiara.text("L"), Tiara.text("R"))
+    check html.contains("data-tiara=\"editor-split\"")
+    check html.contains("editor-split-pane")
+    check html.contains("editor-split-preview")
+
+  test "preview panel wraps prose marker":
+    let html = $Tiara.previewPanel(Tiara.text("Hi"))
+    check html.contains("data-tiara=\"preview-panel\"")
+    check html.contains("tiara-prose")
+
+  test "doc editor surface omits breadcrumb when empty":
+    let html = $Tiara.docEditorSurface(Tiara.text("H"), Tiara.text("B"))
+    check html.contains("data-tiara=\"doc-editor-surface\"")
+    check (not html.contains("doc-editor-breadcrumb"))
+
+  test "doc editor surface includes breadcrumb when provided":
+    let html = $Tiara.docEditorSurface(
+      Tiara.text("H"),
+      Tiara.text("B"),
+      breadcrumb = Tiara.text("bc"),
+    )
+    check html.contains("doc-editor-breadcrumb")
+
   test "textarea renders rows and data marker":
     let html = $Tiara.textarea(
       "body",
@@ -355,3 +384,83 @@ suite "Tiara components":
     check css.contains(".app-shell {")
     check css.contains(".textarea:focus")
     check css.contains(".chat-composer")
+
+  test "segmented control renders toggle cluster":
+    let html = $Tiara.segmentedControl("modes", @[
+      ("Editor", false), ("Split", true), ("Preview", false)
+    ])
+    check html.contains("data-tiara=\"segmented-control\"")
+    check html.contains("id=\"modes\"")
+    check html.contains("aria-pressed=\"true\"")
+
+  test "tool strip wraps children":
+    let html = $Tiara.toolStrip(@[
+        Tiara.button("A"),
+        Tiara.button("B", color = "secondary"),
+      ], variant = "elevated")
+    check html.contains("data-tiara=\"tool-strip\"")
+    check html.contains("tool-strip-elevated")
+
+  test "dashboard shell wires sidebar region":
+    let html = $Tiara.dashboardShell(Tiara.text("side"), Tiara.text("main"))
+    check html.contains("data-tiara=\"dashboard-shell\"")
+    check html.contains("dashboard-shell-sidebar")
+    check html.contains("dashboard-shell-main")
+
+  test "workspace shell nests drawer control":
+    let html = $Tiara.workspaceShell(
+      "ws-drawer",
+      topbarStart = Tiara.text("L"),
+      topbarEnd = Tiara.text("R"),
+      sidebar = Tiara.text("S"),
+      main = Tiara.text("M"),
+    )
+    check html.contains("data-tiara=\"workspace-shell\"")
+    check html.contains("id=\"ws-drawer\"")
+    check html.contains("workspace-shell-grid")
+
+  test "workspace drawer toggle targets checkbox id":
+    let html = $Tiara.workspaceDrawerToggle("ws-drawer")
+    check html.contains("for=\"ws-drawer\"")
+    check html.contains("workspace-shell-burger")
+
+  test "consent banner exposes dialog semantics":
+    let html = $Tiara.consentBanner(
+      Tiara.text("Cookie note"),
+      Tiara.button("OK", size = "small")
+    )
+    check html.contains("data-tiara=\"consent-banner\"")
+    check html.contains("role=\"dialog\"")
+
+  test "auth card stacks kicker, title, and body":
+    let html = $Tiara.authCard(
+      "Welcome",
+      Tiara.text("Form"),
+      kicker = "Account",
+      description = "Sign in to continue."
+    )
+    check html.contains("data-tiara=\"auth-card\"")
+    check html.contains("auth-card-kicker")
+    check html.contains("auth-card-description")
+
+  test "auth screen centers card":
+    let html = $Tiara.authScreen(Tiara.authCard("Hi", Tiara.text("X")))
+    check html.contains("data-tiara=\"auth-screen\"")
+    check html.contains("auth-card")
+
+  test "page heading optional actions slot":
+    let html = $Tiara.pageHeading(
+      "Requests",
+      description = "Manage submissions.",
+      actions = Tiara.button("Export", size = "small", color = "secondary")
+    )
+    check html.contains("data-tiara=\"page-heading\"")
+    check html.contains("page-heading-actions")
+
+  test "sidebar panel renders header and body":
+    let html = $Tiara.sidebarPanel(
+      Tiara.text("Outline", tag = "h3", attrs = @[("style", "margin:0;font-size:0.9rem;")]),
+      Tiara.text("Empty state")
+    )
+    check html.contains("data-tiara=\"sidebar-panel\"")
+    check html.contains("sidebar-panel-body")

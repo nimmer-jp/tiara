@@ -34,6 +34,157 @@ proc renderPreviewPage*(
   docsHref = "#",
   componentsHref = "#"
 ): string =
+  proc navLink(href, label: string; active: bool): Html =
+    let bg =
+      if active:
+        "background:#e8f0ff;border:1px solid #bfdbfe;color:#1e3a8a;"
+      else:
+        "color:#334155;"
+    el("a", textNode(label), @[("href", href), ("style",
+        "display:block;padding:0.55rem 0.7rem;border-radius:0.65rem;font-weight:600;text-decoration:none;" &
+        bg)])
+
+  let workspaceDemo = Tiara.workspaceShell(
+    "catalog-workspace-drawer",
+    topbarStart = joinHtml(@[
+      Tiara.workspaceDrawerToggle("catalog-workspace-drawer"),
+      el("a", joinHtml(@[
+        el("small", textNode("workspace"), @[]),
+        textNode("Noto Studio"),
+      ]), @[("href", "#"), ("class", "workspace-shell-brand")]),
+      el("span", textNode("Design critiques"), @[("class", "workspace-shell-pill")]),
+    ]),
+    topbarEnd = joinHtml(@[
+      el("span", textNode("you@example.com"), @[("class", "workspace-shell-meta")]),
+      Tiara.button("共有", color = "secondary", size = "small", outlined = true),
+    ]),
+    sidebar = joinHtml(@[
+      el("p", textNode("Pages"), @[("style", "margin:0 0 0.35rem;font-size:0.65rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#6f89ae;")]),
+      el("div", joinHtml(@[
+        el("a", textNode("Getting started"), @[("href", "#"), ("style", "display:block;border-radius:0.85rem;padding:0.45rem 0.65rem;color:#dbe6f7;text-decoration:none;background:rgba(255,255,255,0.08);")]),
+        el("a", textNode("API reference"), @[("href", "#"), ("style", "display:block;border-radius:0.85rem;padding:0.45rem 0.65rem;color:#dbe6f7;text-decoration:none;")]),
+      ]), @[("class", "workspace-shell-sidebar-scroll")]),
+    ]),
+    main = joinHtml(@[
+      el("h2", textNode("ワークスペース"), @[("style", "margin:0 0 0.5rem;font-size:1.15rem;")]),
+      Tiara.text(
+          "Midnote `web2` のシェルに近いレイアウト。窄いビューではハンバーガーでサイドバーを開閉します。",
+          tag = "p",
+          attrs = @[("style", "margin:0;color:#475569;line-height:1.65;font-size:0.92rem;")]),
+    ]),
+  )
+
+  let dashboardDemo = Tiara.dashboardShell(
+    joinHtml(@[
+      el("div", joinHtml(@[
+        el("h1", textNode("tategaki admin2"), @[("style", "margin:0;font-size:1.05rem;color:#0f172a;")]),
+        el("p", textNode("admin@local"), @[("style", "margin:0.35rem 0 0;font-size:0.78rem;color:#64748b;")]),
+      ]), @[]),
+      el("nav", joinHtml(@[
+        navLink("#", "要望管理", true),
+        navLink("#", "ユーザー管理", false),
+      ]), @[("style", "display:flex;flex-direction:column;gap:0.35rem;margin-top:0.75rem;")]),
+      el("div", Tiara.button("ログアウト", color = "secondary", size = "medium",
+          buttonType = "submit"), @[("style", "margin-top:auto;")]),
+    ]),
+    joinHtml(@[
+      Tiara.pageHeading("リクエスト一覧",
+          description = "最新のフィードバックを確認します。",
+          actions = Tiara.badge("β", tone = "accent", variant = "outline")),
+      Tiara.card("今月の要望", Tiara.text(
+          "テーブル・ページネーションなどはホストアプリ側で追加します。Tiara はシェルと余白のリズムを揃えます。",
+          tag = "p",
+          attrs = @[("style", "margin:0;")])),
+    ]),
+  )
+
+  let editorChromeDemo = joinHtml(@[
+    catalogLabel("セグメント（Editro ビュー切替）"),
+    Tiara.segmentedControl("catalog-segments", @[
+      ("編集", false), ("分割", true), ("プレビュー", false),
+    ], size = "small"),
+    catalogLabel("ツールストリップ"),
+    Tiara.toolStrip(@[
+      Tiara.button("太字", size = "small", color = "secondary"),
+      Tiara.button("コード", size = "small", color = "secondary"),
+      Tiara.button("画像", size = "small", color = "secondary"),
+    ], variant = "elevated"),
+    catalogLabel("サイドパネル"),
+    Tiara.sidebarPanel(
+      header = joinHtml(@[
+        el("h3", textNode("アウトライン"), @[("style", "margin:0;font-size:0.85rem;color:#475569;")]),
+        Tiara.button("更新", size = "small"),
+      ]),
+      body = Tiara.text(
+          "見出しが増えるとツリーが並びます（Editro のドキュメント一覧サイドバー想定）。",
+          tag = "p",
+          attrs = @[("style", "margin:0;")]),
+    ),
+  ])
+
+  let docEditorBlockDemo = Tiara.docEditorSurface(
+    header = joinHtml(@[
+      voidEl("input", @[
+        ("class", "input doc-editor-title"),
+        ("name", "note_title"),
+        ("type", "text"),
+        ("placeholder", "無題のノート"),
+        ("value", "Tiara ドキュメント"),
+      ]),
+      el("div", joinHtml(@[
+        Tiara.segmentedControl("catalog-doc-modes", @[
+          ("Editor", true), ("Preview", false),
+        ], size = "small"),
+      ]), @[("class", "doc-editor-head-actions")]),
+    ]),
+    body = Tiara.editorSplit(
+      Tiara.textarea(
+        "note_body",
+        variant = "editor",
+        rows = 7,
+        placeholder = "# 見出し\n本文…",
+        attrs = @[("style", "width:100%;")],
+      ),
+      Tiara.previewPanel(rawHtml(
+        "<p>ここに <code>Markdown</code> のプレビュー HTML が載ります（Midnote の右ペイン）。</p>" &
+        "<p>実装ではホストのレンダラがこの DOM を更新します。</p>"
+      )),
+    ),
+    breadcrumb = el("p", joinHtml(@[
+      el("a", textNode("All notes"), @[("href", "#")]),
+      rawHtml(" <span style=\"color:#94a3b8;\">/</span> "),
+      el("span", textNode("Tiara"), @[]),
+    ]), @[("style", "margin:0;")]),
+  )
+
+  let consentDemo = Tiara.consentBanner(
+    Tiara.text(
+        "計測やサードパーティタグを使う前に同意を取るバナー。Midnote ランディングの Cookie 同意を抽象化。",
+        tag = "p",
+        attrs = @[("style", "margin:0;")]),
+    joinHtml(@[
+      Tiara.button("拒否", color = "secondary", size = "small", outlined = true),
+      Tiara.button("同意する", size = "small"),
+    ]),
+    id = "catalog-consent",
+    attrs = @[
+      ("class", "consent-banner--demo"),
+      ("style", "position:relative;left:auto;right:auto;bottom:auto;z-index:1;border-radius:0.75rem;")
+    ],
+  )
+
+  let authDemo = Tiara.authScreen(Tiara.authCard(
+    "サインイン",
+    joinHtml(@[
+      Tiara.input("login", label = "メール", placeholder = "you@example.com"),
+      Tiara.input("pw", label = "パスワード", inputType = "password"),
+      Tiara.button("続行", size = "large", buttonType = "submit", attrs = @[(
+          "style", "width:100%;margin-top:0.5rem;")]),
+    ]),
+    kicker = "Trust & access",
+    description = "admin2 / Midnote のログイン画面で使う集中カード。",
+  ))
+
   let navbarDemo = Tiara.navbar(
     brand = "👑 Tiara",
     links = @[
@@ -230,9 +381,9 @@ proc renderPreviewPage*(
   ])
 
   let catalogMeta = el("div", joinHtml([
-    Tiara.badge("17 component groups", tone = "accent", variant = "solid"),
-    Tiara.badge("Interactive demos", tone = "success"),
-    Tiara.badge("SSR-first", tone = "warning", variant = "outline")
+    Tiara.badge("25+ primitives", tone = "accent", variant = "solid"),
+    Tiara.badge("Crown / Nim SSR", tone = "success"),
+    Tiara.badge("Panels & shells", tone = "warning", variant = "outline")
   ]), @[("class", "showcase-row")])
 
   let sectionHeaderDemo = el("div", joinHtml([
@@ -627,15 +778,120 @@ proc renderPreviewPage*(
       "    <div class=\"toast-triggers\">{toastTrigger}</div>",
       "  \"\"\""
     ].join("\n")
+    codeWorkspace = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc shell(): string =",
+      "  $Tiara.workspaceShell(",
+      "    \"drawer-id\",",
+      "    topbarStart = Tiara.workspaceDrawerToggle(\"drawer-id\"),",
+      "    topbarEnd = Tiara.button(\"Share\", outlined = true),",
+      "    sidebar = Tiara.text(\"Notes\"),",
+      "    main = Tiara.text(\"Document\")",
+      "  )",
+    ].join("\n")
+    codeDashboard = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc layout(): string =",
+      "  $Tiara.dashboardShell(",
+      "    Tiara.text(\"Sidebar nav\"),",
+      "    joinHtml(@[",
+      "      Tiara.pageHeading(\"Inbox\", description = \"…\"),",
+      "      Tiara.card(\"Table\", Tiara.text(\"Rows\"))",
+      "    ])",
+      "  )",
+    ].join("\n")
+    codeEditorChrome = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc chrome(): string =",
+      "  $joinHtml(@[",
+      "    Tiara.segmentedControl(\"modes\", @[",
+      "      (\"Editor\", false), (\"Preview\", true)",
+      "    ]),",
+      "    Tiara.toolStrip(@[",
+      "      Tiara.button(\"Bold\", size = \"small\", color = \"secondary\"),",
+      "    ], variant = \"elevated\"),",
+      "    Tiara.sidebarPanel(Tiara.text(\"H\"), Tiara.text(\"Body\"))",
+      "  ])",
+    ].join("\n")
+    codeDocEditor = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc page(): string =",
+      "  $Tiara.docEditorSurface(",
+      "    header = joinHtml(@[",
+      "      voidEl(\"input\", @[",
+      "        (\"class\", \"input doc-editor-title\"),",
+      "        (\"name\", \"title\"), (\"type\", \"text\")",
+      "      ]),",
+      "      Tiara.segmentedControl(\"m\", @[(\"Ed\", true), (\"Pv\", false)])",
+      "    ]),",
+      "    body = Tiara.editorSplit(",
+      "      Tiara.textarea(\"body\", variant = \"editor\", rows = 14),",
+      "      Tiara.previewPanel(Tiara.text(\"Preview\"))",
+      "    ),",
+      "    breadcrumb = Tiara.text(\"Home / Note\")",
+      "  )",
+    ].join("\n")
+    codeConsent = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc banner(): string =",
+      "  $Tiara.consentBanner(",
+      "    Tiara.text(\"Cookie notice\"),",
+      "    Tiara.button(\"Accept\", size = \"small\")",
+      "  )",
+    ].join("\n")
+    codeAuth = @[
+      "import crown/core",
+      "import tiara/components",
+      "",
+      "proc login(): string =",
+      "  $Tiara.authScreen(Tiara.authCard(",
+      "    \"Welcome back\",",
+      "    joinHtml(@[",
+      "      Tiara.input(\"email\", label = \"Email\"),",
+      "      Tiara.button(\"Continue\", buttonType = \"submit\")",
+      "    ]),",
+      "    kicker = \"Account\",",
+      "    description = \"Use your workspace email.\"",
+      "  ))",
+    ].join("\n")
 
-  let content = joinHtml([
-    Tiara.text("Tiara Component Catalog", tag = "h1", attrs = @[("class",
-        "page-title")]),
+  let introHero = el("div", joinHtml([
+    Tiara.text("Pattern library", tag = "p", attrs = @[("class", "play-kicker")]),
+    Tiara.text("Tiara Lab", tag = "h1", attrs = @[("class", "play-title")]),
     Tiara.text(
-        "Explore the same components shipped in the current repository, with live previews (forms, app shell, chat, setup banners). " &
-        "Code tabs follow Crown: import crown/core, render Tiara to string with $, then interpolate in html\"\"\" … {name} … \"\"\". If you also import tiara/core, use except html and tiaraHtml\"\"\" to avoid clashing with Crown's html macro (see docs/crown-integration.md). Basolato tmpli + Component + $(…) is optional.",
-        tag = "p", attrs = @[("class", "page-description")]),
+        "tategaki admin2・Midnote web2・Editro で育てた UI を、SSR 向けプリミティブに再配置しました。下のカードから Crown への貼り付けコードも確認できます。",
+        tag = "p",
+        attrs = @[("class", "play-lead")]),
     catalogMeta,
+  ]), @[("class", "play-hero")])
+
+  let catalogBody = joinHtml([
+    demoSection("Workspace shell", catalogDemoWithTabs(workspaceDemo,
+        codeWorkspace, "catalog-tabs-workspace")),
+    demoSection("ダッシュボードシェル", catalogDemoWithTabs(
+      el("div", dashboardDemo, @[("class", "dashboard-shell-demo")]),
+      codeDashboard, "catalog-tabs-dashboard")),
+    demoSection("エディタークローム", catalogDemoWithTabs(
+      el("div", editorChromeDemo, @[("class", "tiara-catalog-stack")]),
+      codeEditorChrome, "catalog-tabs-editor-chrome")),
+    demoSection("ドキュメントエディタ（分割・プレビュー）", catalogDemoWithTabs(
+      el("div", docEditorBlockDemo, @[("class", "doc-editor-catalog-wrap")]),
+      codeDocEditor, "catalog-tabs-doc-editor")),
+
+    demoSection("同意バナー", catalogDemoWithTabs(
+      consentDemo, codeConsent, "catalog-tabs-consent")),
+    demoSection("認証カード", catalogDemoWithTabs(authDemo, codeAuth,
+        "catalog-tabs-auth")),
 
     demoSection("Navbar", catalogDemoWithTabs(navbarDemo, codeNavbar,
         "catalog-tabs-navbar")),
@@ -696,6 +952,11 @@ proc renderPreviewPage*(
     ])),
   ])
 
+  let content = joinHtml([
+    introHero,
+    Tiara.container(catalogBody),
+  ])
+
   let body = joinHtml([
     Tiara.defaultStyles(),
     rawHtml("""
@@ -703,17 +964,53 @@ proc renderPreviewPage*(
 :root { color-scheme: light; }
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #dbeafe, #f8fafc 36%, #eef2ff 100%);
+  background: #f1f5f9;
   color: #0f172a;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
   line-height: 1.5;
 }
+.play-hero {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.25), transparent 42%),
+    radial-gradient(circle at 82% 20%, rgba(14, 165, 233, 0.18), transparent 38%),
+    linear-gradient(180deg, #0f172a 0%, #111827 42%, #1e293b 100%);
+  
+  box-sizing: border-box;
+  color: #e2e8f0;
+  margin: 0;
+  padding: 2.75rem 1.25rem 2.25rem;
+  width: 100%;
+}
+.play-kicker {
+  color: #a5b4fc;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+.play-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+  margin: 0;
+}
+.play-lead {
+  color: #cbd5e1;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  margin: 0.85rem 0 0;
+  max-width: 40rem;
+}
+.play-hero .showcase-row { margin-top: 1.25rem; }
+.play-hero .badge { border-color: rgba(226, 232, 240, 0.35); }
+.consent-banner--demo { box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12); }
+.dashboard-shell-demo { border-radius: var(--tiara-radius-lg); overflow: hidden; }
+.doc-editor-catalog-wrap { max-width: 56rem; }
 .tiara-catalog-label { color: #64748b; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; margin: 0; text-transform: uppercase; }
 .tiara-catalog-row { align-items: center; display: flex; flex-wrap: wrap; gap: 0.65rem; }
 .tiara-catalog-stack { display: grid; gap: 1.1rem; }
 .page-wrap { padding: 2.5rem 0 4rem; }
-.page-title { font-size: clamp(1.5rem, 2.6vw, 2.4rem); margin: 0 0 0.4rem; }
-.page-description { color: #334155; margin: 0 0 1.25rem; }
 .demo-section { margin-bottom: 1rem; }
 .stack { display: grid; gap: 0.875rem; }
 .showcase-row { align-items: center; display: flex; flex-wrap: wrap; gap: 0.9rem; }
@@ -744,11 +1041,11 @@ body {
   ])
 
   result = fmt"""<!doctype html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tiara Component Catalog</title>
+  <title>Tiara Lab — Component Playground</title>
 </head>
 <body>
 {body}
