@@ -1,4 +1,4 @@
-version       = "0.2.0"
+version       = "0.2.1"
 author        = "Tiara Contributors"
 description   = "Pure Nim UI component library for SSR-first applications"
 license       = "MIT"
