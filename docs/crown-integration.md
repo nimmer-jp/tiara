@@ -48,6 +48,76 @@ Tiara のマークアップ型は `tiara/builder` の `Html`（`tiara/components
 
 - **グローバル CSS／Tailwind／システムスクリプト** は Crown のレイアウトや `crown.json` のワークフローに合わせる（詳細は Crown のドキュメント）。
 - **コンポーネント単位のマーカー**（`data-tiara` など）は Tiara が出力します。`defaultStyles` で注入するスタイルが必要なら、レイアウトの `<head>` か適切なブロックに `$Tiara.defaultStyles()` を含めます（プロジェクトの Crown テンプレートに依存）。
+- **管理画面** では `$Tiara.adminTheme()` を `defaultStyles()` の直後に追加すると、`--page-bg` などのアプリ側変数を `--tiara-*` に揃えられます。
+
+## 一覧画面（Crown + Tiara）
+
+管理画面の表・ページネーション・インラインフォームは Tiara コンポーネントで組み立て、Crown の `html"""` に `$fragment` で埋め込みます。
+
+```nim
+import crown/core
+import tiara/components
+import tiara/themes/admin
+
+proc requestsPage*(req: Request): string =
+  let rows = @[
+    build(
+      tableRowBuilder()
+        .withCell("Fix sidebar")
+        .withCellNode(Tiara.badge("Open", tone = "warning"), align = "center")
+        .withCellNode(
+          Tiara.form(
+            "/admin/requests/1/status",
+            joinHtml(@[
+              Tiara.hidden("status", "approved"),
+              Tiara.button("Approve", buttonType = "submit", size = "small"),
+            ]),
+            inline = true
+          )
+        )
+    ),
+  ]
+
+  let table = $Tiara.dataTable(
+    @[
+      TableColumn(id: "title", label: "Title"),
+      TableColumn(id: "status", label: "Status", align: "center"),
+      TableColumn(id: "actions", label: "Actions", align: "right"),
+    ],
+    rows
+  )
+  let pager = $Tiara.pagination(
+    currentPage = 2,
+    totalPages = 5,
+    basePath = "/admin/requests"
+  )
+  let shell = $Tiara.adminLayout(
+    brand = "Admin",
+    subtitle = "admin@local",
+    links = @[("Requests", "/admin/requests")],
+    activeHref = "/admin/requests",
+    footer = $Tiara.form("/logout", Tiara.button("Logout", buttonType = "submit")),
+    main = joinHtml(@[
+      Tiara.pageHeading("Requests"),
+      rawHtml(table),
+      rawHtml(pager),
+    ])
+  )
+
+  return html"""
+    <head>
+      {$Tiara.defaultStyles()}
+      {$Tiara.adminTheme()}
+    </head>
+    <body>{shell}</body>
+  """
+```
+
+**エスケープの要点**
+
+- 文字列セルは `tableCell` / `withCell` / `Tiara.table` が自動で HTML エスケープします。
+- バッジやボタンなどマークアップ済みのセルは `tableCellNode` / `withCellNode` を使います。
+- Crown 側で生 HTML を連結する代わりに、上記 API 経由で `Html` を組み立ててから `$` で文字列化してください。
 
 ## 関連ドキュメント
 

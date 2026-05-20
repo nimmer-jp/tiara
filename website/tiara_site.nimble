@@ -3,9 +3,9 @@ author        = "Tiara Contributors"
 description   = "Tiara marketing site (Crown + Basolato + Tiara)"
 license       = "MIT"
 srcDir        = "src"
-namedBin      = {"website.nim": "tiara_site"}
+bin           = @["website=main"]
 
-requires "nim >= 2.2.8"
+requires "nim >= 2.2.6"
 requires "crown == 0.5.7"
 requires "https://github.com/itsumura-h/nim-basolato#v0.15.0"
 

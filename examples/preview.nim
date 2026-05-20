@@ -75,27 +75,56 @@ proc renderCatalogDocument*(
     ]),
   )
 
-  let dashboardDemo = Tiara.dashboardShell(
-    joinHtml(@[
-      el("div", joinHtml(@[
-        el("h1", textNode("tategaki admin2"), @[("style", "margin:0;font-size:1.05rem;color:#0f172a;")]),
-        el("p", textNode("admin@local"), @[("style", "margin:0.35rem 0 0;font-size:0.78rem;color:#64748b;")]),
-      ]), @[]),
-      el("nav", joinHtml(@[
-        navLink("#", "要望管理", true),
-        navLink("#", "ユーザー管理", false),
-      ]), @[("style", "display:flex;flex-direction:column;gap:0.35rem;margin-top:0.75rem;")]),
-      el("div", Tiara.button("ログアウト", color = "secondary", size = "medium",
-          buttonType = "submit"), @[("style", "margin-top:auto;")]),
-    ]),
-    joinHtml(@[
-      Tiara.pageHeading("リクエスト一覧",
-          description = "最新のフィードバックを確認します。",
-          actions = Tiara.badge("β", tone = "accent", variant = "outline")),
-      Tiara.card("今月の要望", Tiara.text(
-          "テーブル・ページネーションなどはホストアプリ側で追加します。Tiara はシェルと余白のリズムを揃えます。",
-          tag = "p",
-          attrs = @[("style", "margin:0;")])),
+  let dashboardDemo = Tiara.adminLayout(
+    brand = "tategaki admin2",
+    subtitle = "admin@local",
+    links = @[
+      ("要望管理", "#requests"),
+      ("ユーザー管理", "#users"),
+    ],
+    activeHref = "#requests",
+    footer = Tiara.form(
+      "/logout",
+      Tiara.button("ログアウト", color = "secondary", size = "medium", buttonType = "submit")
+    ),
+    main = joinHtml(@[
+      Tiara.pageHeading(
+        "リクエスト一覧",
+        description = "最新のフィードバックを確認します。",
+        actions = Tiara.badge("β", tone = "accent", variant = "outline")
+      ),
+      Tiara.dataTable(
+        @[
+          TableColumn(id: "title", label: "タイトル"),
+          TableColumn(id: "status", label: "ステータス", align: "center"),
+          TableColumn(id: "actions", label: "操作", align: "right"),
+        ],
+        @[
+          build(
+            tableRowBuilder()
+              .withCell("サイドバーの折りたたみ")
+              .withCellNode(Tiara.badge("未対応", tone = "warning"), align = "center")
+              .withCellNode(
+                Tiara.form(
+                  "/admin/requests/1/status",
+                  joinHtml(@[
+                    Tiara.hidden("status", "in_progress"),
+                    Tiara.button("着手", buttonType = "submit", size = "small"),
+                  ]),
+                  inline = true
+                ),
+                align = "right"
+              )
+          ),
+          build(
+            tableRowBuilder()
+              .withCell("ダークモード対応")
+              .withCellNode(Tiara.badge("完了", tone = "success"), align = "center")
+              .withCellNode(Tiara.text("—", tag = "span"), align = "right")
+          ),
+        ]
+      ),
+      Tiara.pagination(currentPage = 1, totalPages = 3, basePath = "/admin/requests"),
     ]),
   )
 

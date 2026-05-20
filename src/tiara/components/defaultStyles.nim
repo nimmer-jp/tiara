@@ -906,6 +906,104 @@ proc defaultStyles*(T: typedesc[Tiara]): Html =
   overflow: hidden;
 }
 
+.data-table {
+  border: 1px solid var(--tiara-border);
+  border-radius: var(--tiara-radius-lg);
+  overflow: hidden;
+  width: 100%;
+}
+.data-table-grid {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  width: 100%;
+}
+.data-table-grid th,
+.data-table-grid td {
+  border-bottom: 1px solid var(--tiara-border);
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  vertical-align: top;
+}
+.data-table-grid th {
+  background: var(--tiara-surface-muted);
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.data-table-grid tbody tr:last-child td { border-bottom: none; }
+.data-table-striped tbody tr:nth-child(even) { background: var(--tiara-surface-muted); }
+.data-table-empty { background: var(--tiara-surface-muted); text-align: center; }
+.data-table-empty-message { color: var(--tiara-fg-muted); margin: 0; }
+.data-table-cell-align-center { text-align: center; }
+.data-table-cell-align-right { text-align: right; }
+
+.pagination {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  width: 100%;
+}
+.pagination-links {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.pagination-link {
+  border: 1px solid var(--tiara-border);
+  border-radius: var(--tiara-radius-md);
+  color: #475569;
+  display: inline-flex;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  min-width: 2rem;
+  padding: 0.35rem 0.65rem;
+  place-content: center;
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.pagination-link:hover { background: var(--tiara-surface-subtle); color: var(--tiara-fg); }
+.pagination-link.is-active {
+  background: var(--tiara-primary);
+  border-color: var(--tiara-primary);
+  color: #fff;
+}
+.pagination-link.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.pagination-ellipsis {
+  color: var(--tiara-fg-muted);
+  font-size: 0.8125rem;
+  padding-inline: 0.15rem;
+}
+
+.form {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+}
+.form-inline {
+  align-items: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  width: auto;
+}
+.form-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.form-actions-start { justify-content: flex-start; }
+.form-actions-end { justify-content: flex-end; }
+.form-actions-between { justify-content: space-between; }
+
 @media (max-width: 960px) {
   .app-shell { grid-template-columns: 1fr; }
   .app-shell-sidebar { border-bottom: 1px solid var(--tiara-border); border-right: none; max-height: 40vh; }

@@ -464,3 +464,102 @@ suite "Tiara components":
     )
     check html.contains("data-tiara=\"sidebar-panel\"")
     check html.contains("sidebar-panel-body")
+
+  test "table auto-escapes string cells":
+    let html = $Tiara.table(
+      @["Name", "Status"],
+      @[
+        @["<script>", "pending"],
+        @["Alice", "done"],
+      ]
+    )
+    check html.contains("data-tiara=\"data-table\"")
+    check html.contains("&lt;script&gt;")
+    check (not html.contains("<script>"))
+
+  test "dataTable supports empty state and html cells":
+    let html = $Tiara.dataTable(
+      @[
+        TableColumn(id: "title", label: "Title"),
+        TableColumn(id: "status", label: "Status", align: "center"),
+      ],
+      @[],
+      emptyMessage = "No requests yet"
+    )
+    check html.contains("data-table-empty")
+    check html.contains("No requests yet")
+
+    let rowHtml = $tableRow(@[
+      tableCell("Fix sidebar"),
+      tableCellNode(Tiara.badge("Open", tone = "warning"), align = "center"),
+    ])
+    check rowHtml.contains("data-tiara=\"badge\"")
+
+  test "table row builder escapes values":
+    let html = $build(
+      tableRowBuilder()
+        .withCell("A")
+        .withCellNode(Tiara.button("Go", size = "small"))
+    )
+    check html.contains("<td>A<")
+    check html.contains("btn")
+
+  test "pagination renders prev, pages, and next":
+    let html = $Tiara.pagination(
+      currentPage = 2,
+      totalPages = 5,
+      basePath = "/admin/requests"
+    )
+    check html.contains("data-tiara=\"pagination\"")
+    check html.contains("href=\"/admin/requests?page=1\"")
+    check html.contains("href=\"/admin/requests?page=3\"")
+    check html.contains("aria-current=\"page\"")
+    check html.contains("pagination-prev")
+    check html.contains("pagination-next")
+
+  test "form hidden and actions render expected markup":
+    let html = $Tiara.form(
+      "/admin/requests/1/status",
+      joinHtml(@[
+        Tiara.hidden("status", "approved"),
+        Tiara.formActions(@[
+          Tiara.button("Approve", buttonType = "submit", size = "small"),
+        ]),
+      ]),
+      inline = true
+    )
+    check html.contains("data-tiara=\"form\"")
+    check html.contains("type=\"hidden\"")
+    check html.contains("data-tiara=\"form-actions\"")
+    check html.contains("form-inline")
+
+  test "admin layout wires sidebar nav and footer slot":
+    let html = $Tiara.adminLayout(
+      brand = "Admin",
+      subtitle = "admin@local",
+      links = @[
+        ("Requests", "/admin/requests"),
+        ("Users", "/admin/users"),
+      ],
+      activeHref = "/admin/requests",
+      footer = Tiara.form(
+        "/logout",
+        Tiara.button("Logout", buttonType = "submit", color = "secondary")
+      ),
+      main = Tiara.pageHeading("Requests")
+    )
+    check html.contains("data-tiara=\"admin-layout\"")
+    check html.contains("admin-nav-link is-active")
+    check html.contains("admin-layout-footer")
+    check html.contains("data-tiara=\"page-heading\"")
+
+  test "admin theme maps page tokens to tiara variables":
+    let css = $Tiara.adminTheme()
+    check css.contains("--page-bg: var(--tiara-surface-muted)")
+    check css.contains(".admin-nav-link.is-active")
+
+  test "default styles include table pagination and form":
+    let css = $Tiara.defaultStyles()
+    check css.contains(".data-table {")
+    check css.contains(".pagination-link.is-active")
+    check css.contains(".form-inline {")

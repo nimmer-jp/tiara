@@ -81,3 +81,13 @@ import ./components/previewPanel
 export previewPanel
 import ./components/docEditorSurface
 export docEditorSurface
+import ./components/table
+export table
+import ./components/pagination
+export pagination
+import ./components/form
+export form
+import ./components/adminLayout
+export adminLayout
+import ./themes/admin
+export admin
